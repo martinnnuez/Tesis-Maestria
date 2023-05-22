@@ -1,0 +1,420 @@
+#	Comparación de algoritmos predictivos {#cap:comp}
+
+## Introducción
+
+  El modelado predictivo de contaminantes atmosféricos ha tomado gran importancia como base para la implementación de mecanismos de alerta y atenuación de este tipo de contaminación. La medición directa del contaminante a través de un sistema de monitoreo no garantiza una cobertura completa del territorio, sin mencionar sus elevados costes de instalación y mantenimiento. Por este motivo, los modelos predictivos ganaron terreno como una forma efectiva de proveer alertas tempranas, con el objetivo de proteger la salud pública [@titus1990greenhouse]. Estas alertas permiten dar aviso a las autoridades con la finalidad de iniciar el plan de mitigación correspondiente para reducir sus impactos. La gestión de la contaminación puede ser abordada a través de la implementación de mecanismos de atenuación de emisiones como lo es la regulación del tráfico [@cesaroni2012health; @font2019tale], como también de reducción de concentración por medio del lavado a través de la pulverización de agua, además es común aplicar medidas más exigentes en sitios donde poblaciones más vulnerables son afectadas. Esta es la razón por la cual puede hallarse una extensiva literatura relacionada al modelado de contaminantes atmosféricos.
+
+  Los métodos de modelado que mejor desempeño han alcanzado en términos de la exactitud de sus predicciones provienen de la rama de la inteligencia artificial [@he2016numerical; @navares2020deep; @navares2020predicting; @shang2019novel]. El aprendizaje automático es una subárea de la inteligencia artificial, cuyo propósito recae en la creación de algoritmos que aprendan las interrelaciones existentes entre las señales de entrada y las de salida. Mediante el aprendizaje automático se posibilita la creación de programas capaces de derivar el comportamiento de una variable respuesta (variable de salida) a partir de la información de las características (variables de entrada) en un momento dado. Cabe destacar que el aprendizaje profundo es un conjunto de algoritmos de aprendizaje automático que busca modelar abstracciones de alto nivel en los datos usando arquitecturas computacionales que incluyen transformaciones no lineales de forma sucesiva sobre los datos de base [@bengio2013representation; @yeo2021efficient; @tong2019deep].
+
+  La fluctuación de las condiciones meteorológicas que determinan el estado de la atmósfera en un momento determinado generan una notable influencia en la variación de la concentración de material particulado fino (PM~2.5~) [@tiwari2017assessment; @he2017influences]. Numerosos estudios han evidenciado estas asociaciones, su porcentaje mayoritario demuestra una vinculación inversa con el material particulado (PM), las variables citadas en la literatura como explicativas de este patrón son: la velocidad del viento [@cichowicz2020effect; @usman2022exploring; @xiaoyang2019particulate], la precipitación [@usman2022exploring; @xiaoyang2019particulate], la temperatura [@nogarotto2020review; @xiaoyang2019particulate], el punto de rocío [@zhao2022analysis] y la altura de la capa límite atmosférica (PBLH) [@li2020correlation; @wang2019relationship]. Por otra parte, existen variables que responden a una relación directa como la reportada para la profundidad óptica de aerosoles (AOD) [@soni2018particulate; @gupta2021spatio] y el tráfico de vehículos [@pant2013estimation; @weerakkody2018quantification]. Tanto para la presión atmosférica, como para la humedad relativa, existen resultados que vinculan las variables tanto de forma directa [@li2015particulate; @nogarotto2020review] como inversa [@tian2014characteristics; @chen2016spatial]. Es pertinente destacar la existencia de estudios cuyas conclusiones reflejan que la concentración de PM depende más de la meteorología que de factores antropogénicos [@hooyberghs2005neural]. Esta relación de vinculación está sujeta a otras características propias del sitio, como por ejemplo las fuentes de emisión, el tamaño de las partículas [@khan2010characterization; @tai2010correlations; @dimitriou2015dependence] y la topografía [@alvarado2010modeling; @vinoj2022role].
+  
+  Enmarcado dentro del Servicio de Cambio Climático Copernicus (Copernicus Climate Change Service - C3S) de la Agencia Espacial Europea (ESA), el Centro Europeo para Previsiones Meteorológicas a Medio Plazo (European Centre for Medium-Range Weather Forecasts - ECMWF) está produciendo grandes conjuntos de datos climáticos a escala global. Para ello se combinan modelos climáticos y datos observacionales de todo el mundo. Este producto es la quinta generación de Reanálisis Europeo (European ReAnalysis - ERA5), sucesor de ERA-Interim [@munoz2021era5]. Estos productos, ponen a disposición información para todo el mundo a escala temporal diaria y mensual desde el año 1979. Así, cada vez es más factible mapear y modelar las variaciones o cambios espaciotemporales de las condiciones meteorológicas imperantes antes, durante y después de eventos de interés. El avance de la tecnología ha permitido un desarrollo notable en la capacidad computacional disponible, sumado a la disponibilidad de datos meteorológicos masivos en diversas plataformas de Internet, es posible obtener información meteorológica variada para un sitio georreferenciado sobre un territorio de interés. Actualmente, se cuenta con variadas herramientas informáticas para la obtención de productos satelitales almacenados en la nube. Tales productos pueden ser usados como covariables con potencialidad predictiva de la concentración de PM. Sin embargo, aun cuando existen modelos predictivos mecanicista basados en la estimación de efectos para variables reportadas en la literatura, el desarrollo de modelos de base empírica sustentados en la abundancia de información hoy disponible es más incipiente. 
+
+  En esta tesis se compararon distintos enfoques de modelado predictivo basados en el aprendizaje automático y aprendizaje profundo implementando como datos de entrada variables meteorológicas, ambientales y temporales, obtenidas principalmente de satélites. El objetivo de este trabajo es desarrollar ajustar un modelo predictivo capaz de ser empleado como sistema de alerta ante condiciones adversas de concentración de PM~2.5~. 
+
+## Materiales y métodos
+
+### Base de datos
+
+  La base de datos para el desarrollo de esta sección surge de la combinación de los datos recopilados durante el muestreo de PM~2.5~ (ver capítulo [2](#cap:expl) para más detalles) con distintas bases de datos satelitales. Entre estas se destaca la base de datos de ERA5 que surge del reanálisis realizado por el Centro Europeo de Previsión Meteorológica a Plazo Medio (ECMWF) para el clima global [@hersbach2020era5; @bell2021era5]. Este método de estimación combina modelos predictivos con observaciones a lo largo de todo el mundo, dando por resultado un conjunto de datos completo a escala global, cuyo principio de funcionamiento se basa en la asimilación de datos. La base de datos cuenta con estimaciones horarias para 172 variables atmosféricas, oceánicas y terrestres, con una resolución espacial de 0.25 grados, descargadas desde la plataforma ERA5. Además, se incluyeron otras covariables, citadas en la literatura como relevantes para el PM~2.5~, provenientes de las mediciones del sensor MODIS a bordo de los satélites Terra y Aqua de la Administración Nacional de Aeronáutica y el Espacio (NASA) [@savtchenko2004terra; @lyapustin2019maiac; @lyapustin2018modis; @hulley2014thermal], datos obtenidos a partir del análisis retrospectivo de la era moderna para investigación y aplicaciones, versión 2 (MERRA-2) [@bosilovich2015merra] y la base de datos de Google Traffic [@wu2007google]. Una descripción completa de cada una de las variables involucradas se encuentra en el [Anexo](#cap:anx).
+  
+Table: Fuentes de datos de variables satelitales. \label{tab:satdata}
+Referencia: Fuente de datos, dependencia, resolución espacial, resolución temporal y número total de variables descargadas.
+
+| Fuente | Dependencia | Espacial | Temporal | Variables |
+|----------|:--------:|:--------:|:--------:|:--------:|:--------:| 
+| ERA5 (ECMWF reanálisis) | ECMWF | 0.25°x0.25° | horaria | 172 |
+| MODIS-MAIAC (MCD19A2) | NASA | 0.1°×0.1° | horaria | 1 |
+| MERRA-2 (M2T1NXFLX) | NASA  | 0.625°×0.5° | horaria | 1 |
+| MERRA-2 (M2IMNXGAS) | NASA  | 0.625°×0.5° | horaria | 1 |
+| MERRA-2 (SODA) | NASA | 0.625°×0.5° | horaria | 9 |
+| VIIRS (VNP14A1) | NASA | 0.1°×0.1° | diaria | 1 |
+| MODIS (MOD11A1/MYD11A1) | NASA | 0.1°×0.1° | horaria | 1 |
+
+  Las variables temporales (estación, mes, día y hora de la lectura del contaminante) fueron incluidas en su forma categórica original y luego de ser codificadas de manera cíclica a través de la inclusión de sus senos y cosenos. Es importante destacar que todas las variables numéricas se estandarizaron, unificando los rangos de variabilidad. De esta forma, se evitaron los problemas de escala y se facilitó la comparación entre las variables.
+
+### Protocolo estadístico
+
+#### Métodos de inteligencia artificial comparados
+
+  La **regresión lineal múltiple** (*Multiple linear regression*) es una técnica estadística que se utiliza para modelar una variable dependiente como combinación lineal de múltiples variables independientes. Este tipo de análisis es aplicable tanto a datos de sección transversal como a series temporales [@aldas2017analisis]. El supuesto subyacente en el modelo es que existe una relación lineal entre la variable dependiente y las variables independientes. El aprendizaje de la interrelación entre las variables se logra mediante el ajuste de los coeficientes de regresión, estimados a partir de conjuntos de datos de entrenamiento y validados con los de testeo. La regresión lineal busca determinar el hiperplano que mejor ajuste a los datos de entrenamiento, lo cual implica encontrar los coeficientes que minimicen la diferencia entre los valores observados y predichos por el modelo. El ajuste fue llevado a cabo por medio del método de mínimos cuadrados ordinarios, este ajusta un modelo lineal cuyos coeficientes resultantes buscan minimizar la sumatoria cuadrada de residuos entre los valores observados en el conjunto de datos de entrenamiento, y los valores predichos por la aproximación lineal. Luego los resultados son validados a taves de las predicciones en el conjunto de datos de testeo. 
+ 
+  En los últimos años ha aumentado el interés en los métodos de aprendizaje automático que usan ensambles de modelos como los **bosques aleatorios** (*random forest*) [@breiman1996bagging]. Estos métodos combinan los resultados de múltiples modelos independientes para mejorar el rendimiento predictivo del modelo ensamblado. Uno de los métodos de ensamblado más reconocido es el empaquetado (*bagging* o *bootstrap aggregating*) [@breiman1996bagging]. El empaquetado crea múltiples conjuntos de datos mediante remuestreo con reemplazo de los datos de entrenamiento. Al combinar los resultados de los modelos estimados en cada uno de los conjuntos de datos obtenidos por remuestreo, se aumenta la estabilidad y precisión de las predicciones, porque reduce la varianza.
+ 
+  Posteriormente, Breiman [@breiman2001random] propuso el modelo de bosques aleatorios, que añade una capa de aleatoriedad en las variables de entrada a cada uno de los empaquetados, proporcionando mayor robustez contra el sobreajuste. Al ajustar el modelo, se considera un número limitado de variables predictoras elegidas aleatoriamente. Esta aleatoriedad hace que cada uno de los subconjuntos de datos considere distintos subconjuntos de variables predictoras garantizando mayor independencia entre los modelos estimados a partir de las distintos subconjuntos generados por el remuestreo.
+
+  En resumen, el algoritmo de bosques aleatorios combina los resultados de múltiples árboles de regresión independientes, cada uno generado sobre distintos subconjuntos de datos creados a partir de los datos originales y agrega las predicciones resultantes de los distintos árboles a través de un promedio.
+
+  Las **redes neuronales artificiales** (*artificial neural networks (ANN)*) son algoritmos que permiten modelar procesos no lineales de manera eficiente, a partir de la información de entrada recolectada a través de un vector denominado capa de entrada. Una vez ingresada la información se propaga y fluye capa a capa de la red, estableciendo las relaciones entre la capa de entrada y la capa final denominada de salida. El aprendizaje de las interrelaciones entre las variables predictoras se desarrolla a través del ajuste de parámetros característicos de este tipo de modelo denominados pesos sinápticos. Las capas intermedias u ocultas consisten en múltiples unidades denominadas neuronas que se encuentran interconectadas con las neuronas de las capas anterior y posterior. El número de capas ocultas y el número de neuronas en cada una de ellas define la topología de la red. Cada neurona genera una respuesta excitatoria a las señales recibidas por medio de una función de activación. Existen distintas funciones, de las cuales algunas pueden resultar más recomendadas para un objetivo y problema en particular [@bishop1995neural; @hayakin1999learn]. 
+
+  El aprendizaje de la red se basa en capturar las relaciones entre la capa de entrada y de salida a partir de la optimización de una métrica de error. En los problemas de regresión la métrica más implementada es la raíz del error cuadrático medio (*RMSE*), la cual se calcula comparando las salidas predichas por la red con los valores observados. A partir de la pérdida registrada es que se genera una actualización de los pesos sinápticos mediante el algoritmo de retropropagación (*backpropagation*) [@rumelhart1986learning]. Una de las mayores dificultades de este tipo de enfoque es encontrar la topología de red que mejor ajuste a los datos. Este proceso normalmente se aborda a partir del ajuste iterativo de múltiples arquitecturas. Generalmente, se parte de una red simple de una capa oculta y pocas neuronas, y se procede aumentando la complejidad de la red (incrementando secuencialmente el número de neuronas, así como el número de capas ocultas) hasta obtener un modelo satisfactorio que optimice los resultados.
+
+  Las **redes neuronales recurrentes** (*recurrent neural network (RNN)*), a diferencia de las tradicionales, incluyen bucles o conexiones entre unidades que permiten que la información persista en los sucesivos capas de la red. La capacidad de incorporar información sobre el contexto pasado en sus sucesivas salidas las hace especialmente prometedores para tareas en las que la información pasada es relevante para la predicción, como en el caso de series temporales. Las *RNN* pueden ser consideradas como múltiples copias de la misma red neuronal actuando conjuntamente, cada una de las cuales transfiere información a su sucesora y forma una arquitectura en cadena capaz de preservar la información de la secuencia. Las *RNN* son eficientes implementando información pasada en un intervalo de tiempo corto, es decir reciente, para realizar una tarea de predicción. Sin embargo, la información relevante no siempre esta cercana al pasado y, a medida que aumenta el intervalo de tiempo, las *RNN* no logran conectar la información para realizar las predicciones, de esta forma disminuye su capacidad predictiva cuando la información importante se encuentra contenida en mayores desfasajes de tiempo. 
+ 
+  Para solventar esta falencia, en 1997 fueron introducidas las **redes de memoria a corto plazo** (*Long Short-Term Memory (LSTM)*) por Hochreiter y Schmidhuber [@hochreiter1997long] y mejoradas en el 2000 por Gers et al. [@gers2000learning]. Estas son una variación de las *RNN* capaz de aprender dependencias de largo plazo, gracias a la inclusión de unidades especiales llamadas bloques de memoria. Además, de otras unidades multiplicativas llamadas puertas que controlan el flujo de información de una unidad *LSTM* a otra. Una variante de este tipo de red es la **red recurrente con compuerta** (*Gated Recurrent Unit (GRU)*), introducidas por Cho et al. [@cho2014properties], las cuales mantienen las características propias de las *LSTM* con una estructura más simple, reduciendo la cantidad de parámetros a ajustar y permitiendo una ejecución de mayor rapidez y eficiencia. 
+
+#### Metodología de modelado
+ 
+   Se evaluaron múltiples alternativas para desarrollar el modelo predictivo de PM~2.5~, entre ellas distintas formas de condicionarlo, con el objetivo de aumentar el desempeño en la obtención de predicciones. Se generaron modelos para cada estación del año (4 modelos predictivos), día de la semana (7 modelos predictivos), mes del año (12 modelos predictivos), hora del día (24 modelos predictivos) y uso de suelo (3 modelos predictivos). Mediante estadística descriptiva se determinó que el uso del suelo es una fuente de variación importante de las series temporales de PM~2.5~. Y por ello el desarrollo del algoritmo predictivo fue llevado a cabo condicionado por esta variable, de forma que se entrenaron dos algoritmos predictivos, uno para cada uno de los usos de suelo presente en la base de datos.
+   
+  El entrenamiento de los algoritmos predictivos se realizó con un desfasaje de la variable respuesta respecto a las predictoras de 120 horas, es decir, cinco días, con el objetivo de obtener un modelo predictivo que permita disponer de predicciones de concentración de contaminantes atmosféricos con cinco días de anticipación.
+
+#### Selección de variables 
+
+  Fueron analizadas tres alternativas respecto de la cantidad de variables predictoras a incluir en el modelado predictivo. De esta forma pudo determinarse si los algoritmos resultantes de mejor ajuste se mantenían constantes bajo distintas versiones de la base de datos o si la selección de variables estaba jugando un rol fundamental en los resultados obtenidos. Las alternativas evaluadas contemplaron el ajuste bajo una base de datos que involucrase todas las variables regresoras (base de datos completa), otra que involucra las seleccionadas por LASSO y otra base de datos que involucra las variables seleccionadas por el algoritmo featurewiz. Todos los análisis se realizaron con la versión 3.10 de Python, empleando diferentes módulos, entre ellos "scikit-learn", un módulo de aprendizaje automático creado a partir del paquete "scipy" para la selección por LASSO, y "featurewiz", una biblioteca de Python para crear y seleccionar las características más importantes de los datos, para aplicar la selección del algoritmo de featurewiz.
+  
+  El algoritmo LASSO es una técnica de selección de variables que utiliza una penalización (L1) para reducir la complejidad del modelo y mejorar su capacidad de generalización. Su objetivo es encontrar el subconjunto óptimo de variables más relevantes para desarrollar un modelo predictivo. Para lograr esto, LASSO minimiza una función de costo regularizada, que introduce un término de penalización L1. La penalización actúa como un mecanismo de selección de variables, ya que algunos coeficientes de regresión se reducirán a cero, lo que indica que las variables correspondientes no contribuyen significativamente al modelo. Una de las características útiles de LASSO es que permite reducir la dimensionalidad de los datos al eliminar las variables menos importantes [@robert1994regression].
+
+  El algoritmo *featurewiz*, surge de la combinación de dos algoritmos de selección de características. En primer lugar, emplea el algoritmo de SULOV (*Searching for Uncorrelated List of Variables*), que permite reducir la base de datos a un conjunto de variables no correlacionadas, reteniendo aquellas que más se vinculan con la variable respuesta. En segundo lugar, implementa un método de modelado de aprendizaje automático basado en la estimación por el método de ensamblado *ensamble* de la familia de los métodos de impulsar *boosting*, el cual es entrenado de forma recursiva seleccionado las variables que poseen mayor capacidad predictiva. De esta forma, el algoritmo logra encontrar el mejor conjunto de características, que puede ser empleado para entrenar un modelo de aprendizaje automático robusto [@bakheet2023hybrid; @novaes2022modelo; @hu2023glass].
+  
+  Las variables incluidas en cada una de las bases de datos completa y reducidas por selección de características, para cada uno de los usos de suelo se encuentran descriptas en el [Anexo](#cap:anx).
+
+#### Metodología de entrenamiento
+ 
+  La metodología de partición de datos implementada fue una validación cruzada en la cual cada uno de los subconjuntos de datos necesarios para llevar a cabo el entrenamiento del modelo fue obtenido a partir de un muestreo aleatorio estratificado por meses, días y horas. Esta estratificación buscó maximizar la representatividad de las distintas condiciones temporales existentes en los distintos subconjuntos de datos para el ajuste del modelo predictivo. Las respectivas proporciones de los datos para cada uno de los subconjuntos (entrenamiento, validación y testeo), fue de 70%, 15% y 15%, respectivamente. Cabe destacar que en los datos de entrenamiento se mantuvo el orden cronológico de las muestras luego de la extracción de las que formarían parte de los subconjuntos de validación y de testeo.
+ 
+#### Optimización modelo predictivo
+ 
+  Todos los algoritmos predictivos desarrollados fueron optimizados a través de un ajuste iterativo, variando los valores de los hiperparámetros, hasta obtener los valores que garantizaron el mayor desempeño predictivo. Además, para el caso de las redes neuronales se profundizó en el estudio de arquitecturas alternativas para llevar a cabo el modelado. 
+ 
+#### Críterio para interpretar los resultados del modelo
+ 
+  Las contribuciones de cada una de las variables a las predicciones se cuantificaron con el método de los valores de las explicaciones aditivas de Shapley (SHAP) [@lubo2020machine]. Los valores SHAP son una medida de atribución a las variables que permite interpretar modelos complejos de aprendizaje automático. Cada SHAP es la contribución de cada variable independiente a una predicción individual específica, en el caso del PM~2.5~, en unidades de $\frac{\mu g}{m^3}$. En concreto, el SHAP para un predictor y una observación dada es la diferencia existente en los resultados de predicción entre un modelo que se ajusta incluyendo y excluyendo a dicho predictor. Para cada observación, la suma de todos los valores SHAP, más la media general (concentración media global de PM~2.5~ en los datos de entrenamiento), es igual a la predicción del modelo predictivo. La matriz resultante de los valores SHAP puede resumirse para comprender cómo contribuye cada predictor a las predicciones resultantes. El SHAP absoluto medio de todas las observaciones resume la contribución global de cada variable predictora, y es posible una interpretación local del modelo mediante la visualización a través de un gráfico de dispersión que compare los valores de dicha variable y la contribución SHAP que generan dichos valores.
+
+#### Evaluación del modelo predictivo
+
+  A la hora de comparar el desempeño de los distintos algoritmos predictivos tanto en los conjuntos de datos de entrenamiento como el de testeo, se implementaron cinco métricas de rendimiento: la raíz del error cuadrático medio de predicción (RMSE), el error absoluto medio (MAE), el coeficiente de determinación ($R^2$), el coeficiente de correlación al cuadrado ($r^2$) y el coeficiente de concordancia de Lin (CCC).
+
+<!--   Error Cuadrático Medio (*Mean squared error (MSE)*): es un estimador que mide el promedio de los errores al cuadrado, es decir, la diferencia entre el valor observado y su predicción por el modelo. Es una función de riesgo, correspondiente al valor esperado de la pérdida del error al cuadrado o pérdida cuadrática. Mientras menor es su valor, más exactos serán los pronósticos del modelo predictivo [@lehmann2006theory].  -->
+
+<!-- \begin{equation*}  -->
+<!-- MSE = \frac{1}{n}\sum\nolimits_{i=1}^N(y_i-\hat{y_i})^2 -->
+<!-- \end{equation*} -->
+
+  Raíz del Error Cuadrático Medio (*Root mean squared error (RMSE)*): expresa el promedio de la diferencia cuadrática entre los valores predichos por el modelo y los valores observados [@hyndman2006effect]. Esta es siempre no negativa, y un valor de 0 (poco común en la práctica) indicaría un ajuste perfecto a los datos. Generalmente, mientras menor RMSE mejor ajuste o mayor exactitud en las predicciones. Esta métrica es sensible a valores atípicos y pone mayor peso en los grandes errores, ya que su coeficiente elevado al cuadrado influirá notablemente en el resultado [@lehmann2006theory; @pontius2008components; @willmott2006use].
+
+\begin{equation*} 
+RMSE = \sqrt{\frac{1}{n}\sum\nolimits_{i=1}^N(y_i-\hat{y_i})^2}
+\end{equation*}
+
+  Error absoluto medio (*Mean absolute error (MAE)*): mide la media de las diferencias absolutas entre los valores predichos por el modelo y los valores observados, siendo menos sensible a valores atípicos a diferencia del RMSE. Una ventaja del MAE es que es fácil de interpretar, ya que se mide en las mismas unidades que la variable de respuesta. Un valor de MAE más bajo indica que el modelo es más preciso. 
+ 
+\begin{equation*} 
+MAE = \sum_{i=1}^{N}|y_i-\hat{y_i}|
+\end{equation*}
+
+  Otra métrica de evaluación de modelos predictivos es el coeficiente de determinación (*coefficient of determination (R-squared)*). Esta métrica estima la proporción de la varianza de la variable respuesta que puede ser explicada por el modelo. El R-squared toma valores entre 0 y 1, donde 0 indica que el modelo no explica nada de la variabilidad de la variable respuesta, mientras que 1 indica que el modelo explica la totalidad de la variabilidad.
+ 
+\begin{equation*} 
+R^2 = \frac{SSR}
+{SST}
+\end{equation*}
+  
+  Donde SSR es la suma de regresión al cuadrado también conocida como variación explicada por el modelo y SST es la variación total en los datos también conocida como suma total al cuadrado.
+
+\begin{equation*} 
+SSR = \sum\nolimits_{i=1}^N(\hat{y_i}-\overline{y})^2
+\end{equation*}
+
+\begin{equation*} 
+SST = \sum\nolimits_{i=1}^N(y_i-\overline{y})^2
+\end{equation*}
+
+  Donde $y_i$ es el valor y para la observación i, $\overline{y}$ es la media del valor y y $\hat{y_i}$ es el valor predicho de y para la observación i. 
+  
+  El R-squared es una medida útil para evaluar el ajuste del modelo, ya que permite comparar el modelo predictivo con un modelo nulo que simplemente predice la media de la variable de respuesta. Si el R-squared es mayor que cero, el modelo predictivo proporciona una mejora con respecto al modelo nulo. Además, el R-squared se puede utilizar para comparar diferentes modelos y determinar cuál de ellos proporciona la mejor explicación de la variabilidad de la variable respuesta. Una limitación del R-cuadrado es que puede aumentar incluso incluso al añadir variables irrelevantes al modelo, lo que se conoce como sobreajuste. Por lo tanto, es importante utilizar otras métricas en conjunto con el R-cuadrado para evaluar la calidad del modelo.
+
+  El coeficiente de correlación de Pearson (*Pearson’s correlation coefficient (r)*) es una medida estadística que indica el grado de asociación lineal entre dos variables. El coeficiente de correlación de Pearson es el más utilizado y los valores que toma oscilan entre -1 y 1. Un valor de 1 indica una correlación positiva perfecta, lo que significa que cuando una variable aumenta, la otra variable también aumenta en la misma proporción. Un valor de -1 indica una correlación negativa perfecta, lo que significa que cuando una variable aumenta, la otra variable disminuye en la misma proporción. Un valor de 0 indica que no hay correlación entre las dos variables. El cuadrado del mismo oscila entre valores de 0 y 1, se espera que mientras mayor sea su valor mejor sea el ajuste del modelo predictivo, o exista mayor asociación entre los valores observados y predichos. Es importante destacar que el coeficiente de correlación de Pearson solo mide la asociación lineal entre dos variables, por lo que puede no ser adecuado para evaluar la relación entre variables no lineales. Además, al igual que el coeficiente de determinación, el coeficiente de correlación también puede ser afectado por valores atípicos o variables irrelevantes, lo que puede llevar a conclusiones erróneas. Por lo tanto, es recomendable utilizar otras métricas en conjunto con el coeficiente de correlación para evaluar la calidad del modelo.
+
+\begin{equation*} 
+r = \frac{{}\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}
+{\sqrt{\sum_{i=1}^{n} (x_i - \overline{x})^2(y_i - \overline{y})^2}}
+\end{equation*}
+
+  Otra métrica útil para evaluar el ajuste del modelo es el coeficiente de concordancia de Lin (*Lin's Concordance Correlation Coefficient (CCC)*) que evalúa la correlación entre dos variables al mismo tiempo que mide su concordancia. A diferencia del coeficiente de correlación de Pearson, el CCC toma en cuenta tanto la precisión como la exactitud del modelo. El CCC oscila entre -1 y 1, donde un valor de 1 indica una correlación y concordancia perfectas, mientras que un valor de -1 indica una correlación inversa y discordancia perfectas. Un valor de 0 indica que no hay correlación ni concordancia entre las dos variables. Es importante destacar que el CCC es una métrica más robusta que el coeficiente de correlación de Pearson, ya que no se ve afectado por valores atípicos o distribuciones no normales.
+
+\begin{equation*} 
+\dfrac{2 s_{12}}{(\overline{x}_{1} - \overline{x}_{2})^{2} + s_{1}^{2} + s_{2}^{2}}
+\end{equation*}
+  
+  Donde $\overline{x}_{1}$ y $\overline{x}_{2}$ son la media de cada una de las variables, $s_{1}^{2}$ y $s_{2}^{2}$ son la varianza de cada una de las variables y ${s_{12}}$ es su covarianza. 
+
+  Según las métricas de validación, valores más bajos de RMSE y MAE y más altos de $R^2$, $r$ y CCC pueden indicar un rendimiento del modelo más deseable y predicciones más acertadas, o bien con menos errores. 
+
+  Además, cabe destacar que para abordar la comparación de la capacidad predictiva de los modelos ajustados se implementaron dos líneas de base contra las cuales comparar los algoritmos ajustados. Estas refieren a los algoritmos de línea de base (*base line*) que predicen la concentración en la hora siguiente y anterior a la estimación deseada. Cabe destacar que la implementación de los mismos es irreal, ya que no se dispone de estos datos en tiempo real para el área metropolitana de la provincia de Córdoba, a pesar de esto representa un algoritmo de extrema exigencia a superar. Un desempeño superior o similar al de este algoritmo refleja una elevada capacidad predictiva. 
+
+## Resultados y discusión 
+
+### Modelado urbano
+
+#### Comparación de algoritmos
+
+##### Enfoque bajo una base de datos completa
+
+  Este enfoque desarrolla el modelado predictivo a partir de una base de datos que involucra todas las variables descargadas de las múltiples fuentes de datos. Es decir que la base de datos final empleada para llevar a cabo el modelado predictivo involucra un total de 198 variables predictoras.
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de entrenamiento para el uso de suelo urbano bajo el enfoque de una base de datos completa. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modurbtrain}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Redes neuronales recurrentes | 1.657 | 1.174 | 0.972 | 0.987 | 0.986 |
+| Predicción hora siguiente | 3.736 | 2.313 | 0.859 | 0.929 | 0.929 |
+| Predicción hora anterior | 3.743 | 2.319 | 0.858 | 0.929 | 0.929 |
+| Bosques Aleatorios | 6.823 | 4.919 | 0.529 | 0.754 | 0.639 |
+| Regresión lineal múltiple | 7.840 | 5.788 | 0.378 | 0.615 | 0.548 |
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de testeo para el uso de suelo urbano bajo el enfoque de una base de datos completa. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$].\label{tab:modurbtest}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Predicción hora anterior | 3.717 | 2.307 | 0.859 | 0.930 | 0.930 |
+| Redes neuronales recurrentes | 3.747 | 2.472 | 0.857 | 0.927 | 0.924 |
+| Predicción hora siguiente | 3.762 | 2.344 | 0.856 | 0.929 | 0.929 |
+| Bosques Aleatorios | 7.135 | 5.168 | 0.482 | 0.715 | 0.601 |
+| Regresión lineal múltiple | 7.929 | 5.888 | 0.360 | 0.601 | 0.540 |
+
+  Los resultados observados en las tablas \@ref(tab:modurbtrain) y \@ref(tab:modurbtest) muestran que las redes neuronales recurrentes demostraron ser el algoritmo predictivo de mayor desempeño para el uso de suelo urbano bajo el enfoque de una base de datos completa tanto en el conjunto de datos de entrenamiento como en el de testeo. A diferencia de las métricas obtenidas sobre la base de datos de entrenamiento, en el caso de las de testeo, no se logró superar uno de los modelos de base propuestos (predicción hora anterior), sin embargo, los resultados alcanzados demuestran tener una elevada capacidad predictiva. 
+ 
+  El gran desempeño predictivo alcanzado demuestra como las características propias de aprendizaje del algoritmo logran captar las fuentes de variabilidad y realizar estimaciones acertadas de la variable respuesta. Además, puede apreciarse que los algoritmos predictivos restantes no logran superar los algoritmos de base propuestos, demostrando una baja capacidad predictiva en comparación con las redes neuronales recurrentes. 
+
+##### Interpretación del modelo
+  
+  Exploración de las variables de mayor importancia dada su contribución a las predicciones.
+
+```{r impurb, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:impurb)"}
+knitr::include_graphics("images/imagescap3/impurb.png")
+```
+(ref:impurb) Importancia relativa de las variables en el modelo predictivo para la serie de datos urbanos bajo el enfoque de una base de datos completa.
+
+  A partir de la figura \@ref(fig:impurb) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo urbano bajo una base de datos completa. Entre estas se destaca que nueve de las diez son variables satelitales y meteorológicas, demostrando una notable importancia y dependencia de la variable repuesta respecto de estas. Por otra parte, una de las variables se encuentra vinculada a la escala temporal, demostrando dependencia frente a sus patrones de variación temporal. Además, podemos notar que en total las diez variables más importantes reúnen el 20% de la importancia relativa al explicar la variable respuesta, a su vez las cinco de mayor importancia reúnen el 12% y las dos primeras menos del 6%. 
+
+##### Enfoque bajo una base de datos reducida por medio del algoritmo LASSO
+
+  Este enfoque desarrolla el modelado predictivo a partir de una base de datos reducida a partir del algoritmo de selección de variables de LASSO. De esta forma a partir de la base de datos completa que involucra un total de 198 variables predictoras, se aplicó el algoritmo y solo quedaron retenidas un total de 45 variables. 
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de entrenamiento para el uso de suelo urbano bajo una base de datos reducida por medio del algoritmo LASSO. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modurbtrainLASSO}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Redes neuronales recurrentes | 2.091 | 1.513 | 0.955 | 0.978 | 0.977 |
+| Predicción hora siguiente | 3.736 | 2.313 | 0.859 | 0.929 | 0.929 |
+| Predicción hora anterior | 3.743 | 2.319 | 0.858 | 0.929 | 0.929 |
+| Bosques Aleatorios | 6.756 | 4.846 | 0.538 | 0.755 | 0.653 |
+| Regresión lineal múltiple | 8.175 | 6.052 | 0.323 | 0.569 | 0.489 |
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de testeo para el uso de suelo urbano bajo una base de datos reducida por medio del algoritmo LASSO. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modurbtestLASSO}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Predicción hora anterior | 3.717 | 2.307 | 0.859 | 0.930 | 0.930 |
+| Predicción hora siguiente | 3.762 | 2.344 | 0.856 | 0.929 | 0.929 |
+| Redes neuronales recurrentes | 3.804 | 2.506 | 0.853 | 0.925 | 0.921 |
+| Bosques Aleatorios | 7.049 | 5.068 | 0.494 | 0.719 | 0.619 |
+| Regresión lineal múltiple | 8.180 | 6.062 | 0.319 | 0.566 | 0.488 |
+
+  Los resultados observados en la tabla \@ref(tab:modurbtrainLASSO) y \@ref(tab:modurbtestLASSO) muestran que, al igual que en el enfoque bajo una base de datos completa (Tabla \@ref(tab:modurbtrain) y \@ref(tab:modurbtest)), en el caso de una base de datos reducida bajo el algoritmo de LASSO, las redes neuronales recurrentes demuestran ser el algoritmo predictivo de mayor desempeño para el uso de suelo urbano tanto en el conjunto de datos de entrenamiento como en el de testeo. A diferencia de lo sucedido en el enfoque bajo una base de datos completa, en este ninguno de los algoritmos logra superar los modelos de base propuestos en la base de datos de testeo. Sin embargo, los resultados obtenidos muestran una capacidad predictiva superior para el caso de las redes neuronales recurrentes en comparación con los demás algoritmos. Además, puede apreciarse que los algoritmos predictivos restantes no logran superar los ninguno de los de base propuestos en la base de datos de entrenamiento, demostrando una inferior capacidad predictiva. 
+
+##### Interpretación del modelo
+
+  Exploración de las variables de mayor importancia dada su contribución a las predicciones.
+
+```{r impurbLASSO, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:impurbLASSO)"}
+knitr::include_graphics("images/imagescap3/impurb_LASSO.png")
+```
+(ref:impurbLASSO) Importancia relativa de las variables en el modelo para la serie de datos urbanos, bajo una base de datos reducida bajo el algoritmo de LASSO.
+
+  A partir de la figura \@ref(fig:impurbLASSO) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo urbano bajo una base de datos reducida por el algoritmo de LASSO. Entre estas se destaca que cinco de las diez son variables satelitales y meteorológicas, mientras que las restantes cinco son variables temporales, demostrando una dependencia similar de la variable repuesta respecto de estas. Además, podemos notar que en total las diez variables más importantes reúnen el 44% de la importancia relativa al explicar la variable respuesta, a su vez las cinco de mayor importancia reúnen menos el 26% y las dos primeras menos del 15%. 
+
+##### Enfoque bajo una base de datos reducida por medio del algoritmo featurewiz
+
+  Este enfoque desarrolla el modelado predictivo a partir de una base de datos reducida a partir del algoritmo de selección de variables de featurewiz. De esta forma a partir de la base de datos completa que involucra un total de 198 variables predictoras, se aplicó el algoritmo y solo quedaron retenidas un total de 66 variables. 
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de entrenamiento para el uso de suelo urbano bajo una base de datos reducida por medio del algoritmo featurewiz. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modurbtrainfeat}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Redes neuronales recurrentes | 1.943 | 1.390 | 0.960 | 0.981 | 0.980 |
+| Predicción hora siguiente | 3.736 | 2.313 | 0.859 | 0.929 | 0.929 |
+| Predicción hora anterior | 3.743 | 2.319 | 0.858 | 0.929 | 0.929 |
+| Bosques Aleatorios | 6.833 | 4.922 | 0.527 | 0.753 | 0.638 |
+| Regresión lineal múltiple | 8.234 | 6.121 | 0.313 | 0.560 | 0.477 |
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de testeo para el uso de suelo urbano bajo una base de datos reducida por medio del algoritmo featurewiz. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modurbtestfeat}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Predicción hora anterior | 3.717 | 2.307 | 0.859 | 0.930 | 0.930 |
+| Predicción hora siguiente | 3.762 | 2.344 | 0.856 | 0.929 | 0.929 |
+| Redes neuronales recurrentes | 3.897 | 2.587 | 0.845 | 0.921 | 0.918 |
+| Bosques Aleatorios | 7.143 | 5.173 | 0.481 | 0.714 | 0.600 |
+| Regresión lineal múltiple | 8.265 | 6.173 | 0.305 | 0.553 | 0.473 |
+
+  Los resultados observados en la tabla \@ref(tab:modurbtrainfeat) y \@ref(tab:modurbtestfeat) muestran de igual forma que en los anteriores enfoques evaluados (Tabla \@ref(tab:modurbtrain), \@ref(tab:modurbtest), \@ref(tab:modurbtrainLASSO) y \@ref(tab:modurbtestLASSO)) que en el caso de una base de datos reducida bajo el algoritmo de featurewiz, las redes neuronales recurrentes demuestran ser el algoritmo predictivo de mayor desempeño para el uso de suelo urbano tanto en el conjunto de datos de entrenamiento como en el de testeo. De igual forma que lo sucedido para el enfoque de la base de datos reducida por medio del algoritmo de LASSO, ninguno de los algoritmos predictivos logra superar los modelos de base propuestos para los datos de testeo (Tabla \@ref(tab:modurbtestLASSO)), sin embargo, los resultados muestran una capacidad predictiva superior en el caso de las redes neuronales recurrentes en comparación con los demás algoritmos. Además, puede apreciarse que los algoritmos predictivos restantes no logran superar los de base propuestos bajo la base de datos de entrenamiento, demostrando una inferior capacidad predictiva.
+
+##### Interpretación del modelo
+
+  Exploración de las variables de mayor importancia dada su contribución a las predicciones.
+
+```{r impurbfeat, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:impurbfeat)"}
+knitr::include_graphics("images/imagescap3/impurb_feat.png")
+```
+(ref:impurbfeat) Importancia relativa de las variables en el modelo predictivo para la serie de datos urbanos bajo una base de datos reducida por medio del algoritmo de featurewiz.
+
+  A partir de la figura \@ref(fig:impurbfeat) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo urbano, bajo una base de datos reducida por medio del algoritmo de featurewiz. Entre estas se destaca que ocho de las diez son variables satelitales y meteorológicas, demostrando una notable importancia y dependencia de la variable repuesta respecto de estas en este caso. Por otra parte, dos de las variables se hallan vinculada a la escala temporal, demostrando dependencia frente a sus patrones de variación temporal. Además, podemos notar que en total las diez variables más importantes reúnen el 34% de la importancia relativa al explicar la variable respuesta, a su vez las cinco de mayor importancia reúnen menos el 20% y las dos primeras menos del 8%.
+
+### Modelado agrícola y área verde
+
+#### Comparación de algoritmos 
+
+##### Enfoque bajo una base de datos completa
+
+  Este enfoque desarrolla el modelado predictivo a partir de una base de datos que involucra todas las variables descargadas de las múltiples fuentes de datos. Es decir que la base de datos final empleada para llevar a cabo el modelado predictivo involucra un total de 198 variables predictoras.
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de entrenamiento para el uso de agrícola y área verde bajo el enfoque de una base de datos completa. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modaatrain}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Bosques Aleatorios | 1.016 | 0.657 | 0.973 | 0.989 | 0.985 |
+| Redes neuronales recurrentes | 1.363 | 0.940 | 0.950 | 0.975 | 0.973 |
+| Predicción hora siguiente | 2.809 | 1.571 | 0.792 | 0.896 | 0.896 |
+| Predicción hora anterior | 2.817 | 1.567 | 0.791 | 0.895 | 0.895 |
+| Regresión lineal múltiple | 4.941 | 3.681 | 0.356 | 0.597 | 0.525 |
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de testeo para el uso de agrícola y área verde bajo el enfoque de una base de datos completa. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modaatest}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Bosques Aleatorios | 2.673 | 1.749 | 0.810 | 0.903 | 0.888 |
+| Predicción hora anterior | 2.695 | 1.565 | 0.807| 0.904 | 0.904 |
+| Predicción hora siguiente | 2.741 | 1.543 | 0.800 | 0.901 | 0.901 |
+| Redes neuronales recurrentes | 2.846 | 1.843 | 0.784 | 0.887 | 0.881 |
+| Regresión lineal múltiple | 5.013 | 3.741 | 0.334 | 0.579 | 0.511 |
+
+  Los resultados observados en la tabla \@ref(tab:modaatrain) y \@ref(tab:modaatest), permiten notar que para el enfoque bajo una base de datos completa en el uso de suelo agrícola y área verde, el algoritmo predictivo que demuestra el mayor desempeño son los bosques aleatorios. Tanto las redes neuronales como los bosques aleatorios superan los algoritmos de base bajo la base de datos de entrenamiento, a pesar de esto el algoritmo de bosques aleatorios muestra un mayor exactitud en sus predicciones. Por otra parte, las métricas sobre la base de datos de testeo evidencian que excepto el algoritmo de bosques aleatorios, ninguno de los restantes es capas de superar los resultados de los modelos de base propuestos, demostrando que este es el algoritmo de mayor capacidad predictiva para este uso de suelo.
+
+#### Interpretación del modelo
+
+  Exploración de las variables de mayor importancia dada su contribución a las predicciones.
+
+```{r impaa, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:impaa)"}
+knitr::include_graphics("images/imagescap3/impaa.png")
+```
+(ref:impaa) Importancia relativa de las variables en el modelo predictivo para la serie de datos agrícola y área verde en una base de datos completa.
+
+  A partir de la figura \@ref(fig:impaa) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo agrícola y área verde bajo una base de datos completa. Entre estas se destaca que tres de las diez, entre las cuales se halla la de mayor importancia relativa, se encuentran vinculada a la escala temporal, demostrando la notable importancia y dependencia de la variable respuesta con respecto a sus patrones de variación temporales para este uso de suelo. Por otra parte las restantes son variables satelitales demostrando la gran capacidad de las mismas para explicar la variabilidad de la variable respuesta. Además, podemos notar que en total las diez variables más importantes reúnen el 55% de la importancia relativa al explicar la variable respuesta, a su vez las cinco de mayor importancia reúnen el 36% y las dos primeras el 22%.
+
+##### Enfoque bajo una base de datos reducida bajo el el algortimo de LASSO
+
+  Este enfoque desarrolla el modelado predictivo a partir de una base de datos reducida a partir del algoritmo de selección de variables de LASSO. De esta forma a partir de la base de datos completa que involucra un total de 198 variables predictoras, se aplicó el algoritmo y solo quedaron retenidas un total de 40 variables. 
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de entrenamiento para el uso de suelo agrícola y área verde bajo una base de datos reducida por el algoritmo de LASSO. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modaatrainLASSO}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Bosques Aleatorios | 0.975 | 0.625 | 0.975 | 0.990 | 0.986 |
+| Redes neuronales recurrentes | 1.530 | 1.051 | 0.937 | 0.970 | 0.967 |
+| Predicción hora siguiente | 2.809 | 1.571 | 0.792 | 0.896 | 0.896 |
+| Predicción hora anterior | 2.817 | 1.567 | 0.791 | 0.895 | 0.895 |
+| Regresión lineal múltiple | 5.250 | 3.879 | 0.273 | 0.523 | 0.429 |
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de testeo para el uso de suelo agrícola y área verde bajo una base de datos reducida por el algoritmo de LASSO. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modaatestLASSO}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Bosques Aleatorios | 2.550 | 1.650 | 0.827 | 0.912 | 0.899 |
+| Predicción hora anterior | 2.695 | 1.565 | 0.807| 0.904 | 0.904 |
+| Predicción hora siguiente | 2.741 | 1.543 | 0.800 | 0.901 | 0.901 |
+| Redes neuronales recurrentes | 2.784 | 1.796 | 0.794 | 0.893 | 0.888 |
+| Regresión lineal múltiple | 5.241 | 3.900 | 0.272 | 0.523 | 0.430 |
+
+  Los resultados observados en las tablas \@ref(tab:modaatrainLASSO) y \@ref(tab:modaatestLASSO), muestran los mismos resultados que para el caso de una base de datos completa (Tabla \@ref(tab:modaatrain) y \@ref(tab:modaatest)). De esta forma queda en evidencia que el modelo predictivo de mayor desempeño para el uso de suelo agrícola y área verde, ajustado sobre una base de datos reducida bajo el algoritmo de LASSO, son los bosques aleatorios. 
+
+#### Interpretación del modelo
+
+  Exploración de las variables de mayor importancia dada su contribución a las predicciones.
+
+```{r impaaLASSO, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:impaaLASSO)"}
+knitr::include_graphics("images/imagescap3/impaa_LASSO.png")
+```
+(ref:impaaLASSO) Importancia relativa de las variables en el modelo para la serie de datos agrícola y área verde para una base de datos reducida por medio del algoritmo de LASSO.
+
+  A partir de la figura \@ref(fig:impaaLASSO) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo agrícola y área verde bajo una base de datos reducida por medio del algoritmo de LASSO. Entre estas se destaca que seis de las diez, entre las cuales se halla la de mayor importancia relativa, son variables satelitales y meteorológicas, demostrando la dependencia de la variable repuesta respecto de estas. Por otra parte las restantes son variables vinculada a la escala temporal, demostrando la importancia de contemplar los patrones de variación temporales. Además, podemos notar que en total las diez variables más importantes reúnen el 65% de la importancia relativa al explicar la variable respuesta, a su vez las cinco de mayor importancia reúnen el 50% y las dos primeras el 30%.
+
+##### Enfoque bajo una base de datos reducida por el algoritmo de featurewiz
+
+  Este enfoque desarrolla el modelado predictivo a partir de una base de datos reducida a partir del algoritmo de selección de variables de featurewiz. De esta forma a partir de la base de datos completa que involucra un total de 198 variables predictoras, se aplicó el algoritmo y solo quedaron retenidas un total de 54 variables. 
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de entrenamiento para el uso de suelo agrícola y área verde bajo una base de datos reducida por el algoritmo de featurewiz. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modaatrainfeat}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Bosques Aleatorios | 1.020 | 0.662 | 0.973 | 0.989 | 0.985 |
+| Redes neuronales recurrentes | 1.432 | 0.992 | 0.944 | 0.973 | 0.971 |
+| Predicción hora siguiente | 2.809 | 1.571 | 0.792 | 0.896 | 0.896 |
+| Predicción hora anterior | 2.817 | 1.567 | 0.791 | 0.895 | 0.895 |
+| Regresión lineal múltiple | 5.176 | 3.850 | 0.293 | 0.542 | 0.454 |
+
+Table: Métricas de ajuste de los algoritmos predictivos de aprendizaje automático en el set de datos de testeo para el uso de suelo agrícola bajo una base de datos reducida por el algoritmo de featurewiz. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la variable respuesta, es decir [$\frac{\mu g}{m^3}$] \label{tab:modaatestfeat}
+Referencias: Error cuadrático medio (RMSE), error absoluto medio (MAE), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin (CCC).
+
+| Modelo | RMSE | MAE | $R^2$ | $r$ | CCC |
+|:------------------:|:------:|:------:|:------:|:------:|:------:|
+| Predicción hora anterior | 2.695 | 1.565 | 0.807| 0.904 | 0.904 |
+| Bosques Aleatorios | 2.702 | 1.769 | 0.806 | 0.901 | 0.885 |
+| Predicción hora siguiente | 2.741 | 1.543 | 0.800 | 0.901 | 0.901 |
+| Redes neuronales recurrentes | 2.819 | 1.820 | 0.788 | 0.890 | 0.886 |
+| Regresión lineal múltiple | 5.197 | 3.878 | 0.284 | 0.534 | 0.448 |
+
+  Los resultados observados en la tabla \@ref(tab:modaatrainfeat) y \@ref(tab:modaatestfeat), demuestran de igual forma para los restantes enfoques de modelado en el uso de suelo agrícola y área verde, que los bosques aleatorios son el algoritmo de mayor capacidad predictiva en este uso de suelo. A pesar de ello podemos notar que este algoritmo no logra superar el desempeño de uno de los modelos de base propuestos en la base de datos de testeo, sin embargo este demuestra exatitud a la hora de realizar las predicciones.
+
+#### Interpretación del modelo
+
+  Exploración de las variables de mayor importancia dada su contribución a las predicciones.
+
+```{r impaafeat, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:impaafeat)"}
+knitr::include_graphics("images/imagescap3/impaa_feat.png")
+```
+(ref:impaafeat) Importancia relativa de las variables en el modelo para la serie de datos agrícola y área verde para una base de datos reducida bajo el algoritmo de featurewiz. 
+
+  A partir de la figura \@ref(fig:impaafeat) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo agrícola y área verde bajo una base de datos reducida por medio del algoritmo de featurewiz. Entre estas se destaca que seis de las diez, entre las cuales se halla la de mayor importancia relativa, son variables satelitales y meteorológicas, demostrando la dependencia de la variable repuesta respecto de estas. Por otra parte las restantes son variables vinculada a la escala temporal, demostrando la importancia de contemplar los patrones de variación temporales. Además, podemos notar que en total las diez variables más importantes reúnen el 69% de la importancia relativa al explicar la variable respuesta, a su vez las cinco de mayor importancia reúnen el 56% y las dos primeras el 40%.
+  
+### Variación en el paradigma de modelado
+
+  A partir de los resultados obtenidos para los distintos enfoques de modelado predictivo en ambos usos de suelo puede notarse un cambio en el paradigma del algoritmo predictivo de mejor ajuste para cada uno de ellos. Este cambio de paradigma podría encontrarse vinculado no solo a características propias de cada una de las series de tiempo, si no también a las de aprendizaje de los algoritmos empleados en el modelado predictivo.
+
+  En primera instancia, el cambio podría encontrarse vinculado a las características propias de la serie temporal en cada uno de los usos de suelo, las cuales podrían favorecer el desempeño de distintos algoritmos predictivos. En el caso de la serie de tiempo para el uso de suelo agrícola y área verde, se observó que las realizaciones variaban en un entorno reducido respecto de su media. Esto indica una baja dispersión de los datos en relación a la misma, lo que se traduce en una baja frecuencia de fluctuación entre valores de elevada y baja magnitud. Esta característica permite que la variable respuesta pueda ser explicada por un menor número de variables predictoras, dada su baja variabilidad en comparación con la serie urbana (Figuras \@ref(fig:impaa), \@ref(fig:impaaLASSO) y \@ref(fig:impaafeat)).
+  
+  Es destacable como en las primeras cinco variables se reúne un porcentaje considerable de la importancia relativa para explicar la variable respuesta en el uso de suelo agrícola y área verde, frente al urbano. Además, puede destacarse que dentro de las diez variables de mayor importancia relativa, bajo los tres enfoques de selección de variables para el modelado predictivo siempre se mantienen constantes seis variables predictoras, difiriendo sutilmente en el orden de importancia que reciben. Estas son: temperatura del punto de roció, estación codificación coseno, integral vertical de temperatura, mes codificación seno, tasa media de escorrentía subterránea y estación codificación seno. Este hecho refleja como en un número bajo de variables se concentra la información necesaria para modelar la variabilidad de la serie, independientemente del enfoque de modelado que se este considerando. Esta concentración de información se sustenta en que al ser una serie de baja variabilidad se requiere menor información para describir sus fluctuaciones, ya que pueden ser explicadas la mayor parte del tiempo por las mismas variables predictoras.
+ 
+  La concentración de información en un número reducido de variables es favorecedora para el algoritmo de bosques aleatorios, el cual resulta eficiente detectando y utilizando la información de las variables de mayor importancia en la base de datos. Una vez detectadas, estas son retenidas en múltiples árboles individuales del bosque, generando una influencia de mayor peso en las predicciones. Dedo al gran porcentaje de información contenido en una reducida cantidad de variables, este algoritmo logra internalizar de forma efectiva las interrelaciones entre las distintas variables, lo que resulta en un modelo predictivo de elevada exactitud. 
+
+  Por otra parte, es importante destacar que las series provenientes de entornos urbanos presentan una notoria dispersión en sus realizaciones con respecto a su media. Esto implica que sus datos se encuentran menos concentrados en comparación con la series agrícola y de área verde. Además, se trata de una serie de gran variabilidad dado a las continuas fluctuaciones entre valores de elevada y baja magnitud (saltos entre picos y baches de concentración). Por este motivo, a diferencia de la serie temporal agrícola y área verde, en este caso se requiere un número de variables superior para reunir el mismo porcentaje de importancia relativa (Figuras \@ref(fig:impurb), \@ref(fig:impurbLASSO) y \@ref(fig:impurbfeat)). Es importante destacar que entre los distintos enfoques de modelado predictivo, ninguna de las variables predictoras se repite dentro de las diez de mayor importancia relativa. Esto ocurre como consecuencia de la gran variabilidad existente, lo cual genera que las variables retenidas bajo los distintos enfoques de selección de variables difieran notablemente. Además, es importante destacar que la importancia relativa otorgada a cada una de las variables participantes en el modelo varia en un rango sumamente acotado, demostrando que a diferencia del uso de suelo agrícola y área verde no hay variables que demuestren supremacía en cuanto a su importancia relativa que reflejan, si no que su influencia es similar. 
+  
+  De esta forma los algoritmos de redes neuronales ajustados no identificaron variables predictoras de gran importancia relativa, a diferencia de lo que sucede con los bosques aleatorios en el uso de suelo agrícola y área verde. En su lugar, todas las variables aportan de forma homogénea a las predicciones, siendo el algoritmo predictivo el encargado de internalizar las ponderaciones de las mismas en bajo distintas condiciones. Esto puede apreciarse en las figuras \@ref(fig:impurb), \@ref(fig:impurbLASSO) y \@ref(fig:impurbfeat), donde en comparación con los resultados acumulados de porcentaje de importancia relativa para el uso de suelo agrícola y área verde, los evidenciados por el uso de suelo urbano son inferiores.
+  
+  Dadas las características de la serie temporal urbana el modelado predictivo es más apto a través de redes neuronales recurrentes, cuyo algoritmo posee numerosos parámetros que logran reflejar el aporte de cada una de las variables a la predicción bajo las distintas situaciones posibles presentes en la base de datos. De esta forma, al calcularse una gran cantidad de parámetros, puede notarse reflejado en cada predicción la influencia de cada una de las variables presentes en la base de datos, siendo el algoritmo predictivo el encargado de ponderar las influencias en cada caso particular. Al tratarse de una serie en donde la importancia relativa atribuida a las distintas predictoras es similar, el contar con un algoritmo predictivo que tenga en cuenta la influencia conjunta de todas ellas resulta en un elevado desempeño predictivo. De esta forma en cada predicción puede verse reflejada la influencia de cada una de las variables predictoras. Por este motivo era de esperar que los resultados bajo la base de datos completa demuestren una mayor capacidad predictiva, en comparación con los enfoques de bases de datos reducidas. 
+ 
+## Conclusión
+
+  La metodología de modelado que demostró mayor desempeño predictivo estuvo condicionada por el uso de suelo, es decir que el modelo predictivo final se construyó a través de la combinación de dos modelos predictivos uno para cada uno de los usos considerados.  
+  
+  Los resultados obtenidos indican que los modelos predictivos desarrollados logran explicar la variabilidad de la concentración de PM~2.5~ a partir de variables satelitales.
+ 
+  La exactitud en las predicciones del modelo predictivo demostraron que posee potencial para cumplir el objetivo de alertar a la población ante condiciones adversas de calidad de aire con cinco días de anticipación. 
+ 
+  Las características propias de cada una de las series temporales bajo los distintos usos de suelo y las de aprendizaje de cada uno de los algoritmos predictivos evaluados, fueron determinantes en los resultados de mejor ajuste para cada uno de los usos de suelo. 
+
+  El hecho de que la importancia relativa de las variables en los múltiples modelos predictivos para la serie agrícola y área verde siempre contenga las mismas seis variables habla de la concentración de información necesaria para explicar sus fluctuaciones, dada a la baja variabilidad. A su vez, la falta de concentración de la información en la serie urbana, demostrada en la variación de las variables de mayor importancia en los distintos enfoques evaluados, se vincula a la elevada variabilidad presente en la misma. 
+
+  Series temporales con características de gran variabilidad y fluctuaciones entre sus valores son más aptas para ser modeladas a través de redes neuronales recurrentes. Mientras que series temporales de baja variabilidad y fluctuaciones entre sus valores muestran un mejor desempeño bajo el algoritmo de bosques aleatorios. 

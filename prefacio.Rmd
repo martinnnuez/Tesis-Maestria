@@ -1,0 +1,8 @@
+
+* **[Capítulo 1](#cap:ig):** introduce al lector en el concepto del **material particulado fino**, sus implicancias en la salud y la importancia de su estudio.
+
+* **[Capítulo 2](#cap:expl):** muestra el estudio de la **variabilidad espacio temporal** de la concentración de material particulado fino en sitios del área metropolitana de la provincia de Córdoba, Argentina.
+
+* **[Capítulo 3](#cap:comp):** exhibe el procedimiento de ajuste y comparación de **modelos predictivos** para la concentración de material particulado fino en los distintos usos de suelo.  
+
+* **[Capítulo 4](#cap:sint):** muestra las principales **conclusiones y las futuras lineas de investigación** producto de la presente tesis.

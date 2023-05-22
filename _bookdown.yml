@@ -1,0 +1,21 @@
+new_session: yes
+delete_merged_file: yes
+
+output_dir: "docs"
+
+rmd_files:
+  [
+    "index.Rmd",
+    "01_intro_gral.Rmd",
+    "02_exploratorio.Rmd",
+    "03_ComparacionAlgoritmosPredictivos.Rmd",
+    "05_sintesis.Rmd",
+    "Anexo.Rmd",
+    "bibliografia.Rmd"
+  ]
+
+download: [["RodriguezNuñezMartin.pdf", "PDF"]]
+
+language:
+  ui:
+    chapter_name: "Capítulo "
