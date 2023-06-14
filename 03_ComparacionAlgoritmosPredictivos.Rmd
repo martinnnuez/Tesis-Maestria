@@ -1,4 +1,4 @@
-#	Comparación de algoritmos predictivos {#cap:comp}
+#	Algoritmos para la predicción de la concentración de PM~2.5~ {#cap:comp}
 
 ## Introducción
 
@@ -156,9 +156,9 @@ r = \frac{{}\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}
 
   Además, cabe destacar que para abordar la comparación de la capacidad predictiva de los modelos ajustados se implemento una línea de base contra la cual contrastar los algoritmos ajustados. Esta refiere a un modelo de referencia (*base line*), que predice la concentración de PM~2.5~ para la hora que no se tiene dato como la media de la concentración en la hora anterior y posterior. Cabe destacar que esta predicción no es posible en la práctica, ya que no se dispone de datos de concentración de PM~2.5~ en tiempo real. Un desempeño superior o similar al de este modelo de referencia refleja una elevada capacidad predictiva del modelo ajustado. 
 
-## Resultados y discusión 
+## Resultados 
 
-### Comparación de algoritmos para el uso de suelo **urbano** 
+### Comparación de algoritmos para el uso de suelo urbano 
 
 #### Base de datos original
 
@@ -277,7 +277,7 @@ knitr::include_graphics("images/imagescap3/impurb_feat.png")
   
   A partir de la figura \@ref(fig:impurbfeat) pueden apreciarse las diez variables de mayor importancia relativa para el modelo predictivo en el uso de suelo urbano bajo una base de datos reducida por medio del algoritmo de featurewiz. Entre estas se destaca que ocho de las diez son variables satelitales y meteorológicas, demostrando la dependencia existente de la variable repuesta respecto de estas. Por otra parte, dos de las variables se hallan vinculadas a la escala temporal, exhibiendo la dependencia de la variable respuesta frente a sus patrones de variación temporal. Los resultados muestran que estas diez variables reúnen el 34% de la importancia relativa, a su vez las cinco primeras reúnen el 20% y las dos primeras menos del 8%.
   
-### Comparación de algoritmos para el uso de suelo agrícola y área verde
+### Uso de suelo agrícola y área verde
 
 #### Base de datos original
   
