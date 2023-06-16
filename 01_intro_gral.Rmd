@@ -18,11 +18,11 @@
   
   Para contar con estos datos se puede recurrir a la teledetección o sensado remoto, técnica que permite adquirir información mediante instrumentos que no están en contacto físico con los objetos investigados. Los sensores remotos miden la radiación electromagnética que es reflejada o emitida por éstos. Generalmente, se ubican a bordo de aviones o satélites que orbitan la tierra [@chuvieco2010plan]. A partir de la información relevada se logran estimaciones horarias de un gran número de variables climáticas, atmosféricas, terrestres y oceánica, que llegan a cubrir la totalidad de la superficie terrestre. De esta forma, a partir de los productos satelitales podemos contar con información acerca del estado del sistema tierra-atmósfera con alta resolución tanto espacial como temporal. Estas estimaciones se generan por medio de la técnica de reanálisis, la cual combina datos de modelos teóricos, con observaciones *in situ* y leyes físicas. Este principio, denominado asimilación de datos, se encuentra basado en el método utilizado por los centros de predicción meteorológica numérica, en donde cada un lapso de tiempo determinado se combina una previsión anterior con nuevas observaciones disponibles para producir una nueva estimación del estado de la atmósfera [@bell2021era5; @hersbach2020era5; @wu2020regional]. En esta tesis, esos datos son usados para permitir la generación de estimaciones futuras (predicciones) de la concentración de PM~2.5~.
 
-### Objetivo general
+## Objetivo general
 
   Generar modelos predictivos de la concentración de PM~2.5~ en distintos usos de suelo del área metropolitana de la provincia de Córdoba. 
 
-### Objetivos específicos
+## Objetivos específicos
  
   1.    Estudiar las series temporales de concentración de PM~2.5~ emitidas en distintos sitios de muestreo del área metropolitana de la ciudad de Córdoba. 	
 
@@ -31,3 +31,10 @@
   3.    Construir algoritmos predictivos que aprendan de la variabilidad de las series temporales de concentración de PM~2.5~ según el uso de suelo, que permitan predecir concentraciones en un horizonte de corto plazo.
 
   4.    Comparar la capacidad predictiva de algoritmos basados en distintos sub conjuntos de variables satelitales para distintos escenarios respecto al uso del suelo.
+
+## Resumen gráfico del protocolo analítico
+
+```{r diagrama, echo=FALSE, out.width="100%", fig.align="center",fig.cap="(ref:diagrama)"}
+knitr::include_graphics("images/diagram5.png")
+```
+(ref:diagrama) Resumen gráfico del protocolo analítico desarrollado desde la descarga de datos hasta el modelado predictivo.

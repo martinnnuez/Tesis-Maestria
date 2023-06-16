@@ -16,14 +16,14 @@
 
 ### Base de datos
 
-  La base de datos para el desarrollo de esta sección surge de la combinación de los datos recopilados durante el muestreo de PM~2.5~ (ver capítulo [2](#cap:expl) para más detalles) con distintas bases de datos satelitales. Entre estas se destaca la base de datos de ERA5 que surge del reanálisis realizado por el Centro Europeo de Previsión Meteorológica a Plazo Medio (ECMWF) para el clima global [@hersbach2020era5; @bell2021era5]. Este método de estimación combina modelos predictivos con observaciones a lo largo de todo el mundo, dando por resultado un conjunto de datos completo a escala global, cuyo principio de funcionamiento se basa en la asimilación de datos. La base de datos cuenta con estimaciones horarias para 172 variables atmosféricas, oceánicas y terrestres, con una resolución espacial de 0.25 grados, descargadas desde la plataforma ERA5. Además, se incluyeron otras covariables, citadas en la literatura como relevantes para el PM~2.5~, provenientes de las mediciones del sensor MODIS a bordo de los satélites Terra y Aqua de la Administración Nacional de Aeronáutica y el Espacio (NASA) [@savtchenko2004terra; @lyapustin2019maiac; @lyapustin2018modis; @hulley2014thermal], datos obtenidos a partir del análisis retrospectivo de la era moderna para investigación y aplicaciones, versión 2 (MERRA-2) [@bosilovich2015merra] y la base de datos de Google Traffic [@wu2007google]. Una descripción completa de cada una de las variables involucradas se encuentra en el [Anexo](#cap:anx).
+  La base de datos para el desarrollo de esta sección surge de la combinación de los datos recopilados durante el muestreo de PM~2.5~ (ver capítulo [2](#cap:expl) para más detalles) con distintas bases de datos satelitales. Entre estas se destaca la base de datos de ERA5 que surge del reanálisis realizado por el Centro Europeo de Previsión Meteorológica a Plazo Medio (ECMWF) para el clima global [@hersbach2020era5; @bell2021era5]. Este método de estimación combina modelos predictivos con observaciones a lo largo de todo el mundo, dando por resultado un conjunto de datos completo a escala global, cuyo principio de funcionamiento se basa en la asimilación de datos. La base de datos cuenta con estimaciones horarias para 164 variables atmosféricas, oceánicas y terrestres, con una resolución espacial de 0.25 grados, descargadas desde la plataforma ERA5. Además, se incluyeron otras covariables, citadas en la literatura como relevantes para el PM~2.5~, provenientes de las mediciones del sensor MODIS a bordo de los satélites Terra y Aqua de la Administración Nacional de Aeronáutica y el Espacio (NASA) [@savtchenko2004terra; @lyapustin2019maiac; @lyapustin2018modis; @hulley2014thermal], datos obtenidos a partir del análisis retrospectivo de la era moderna para investigación y aplicaciones, versión 2 (MERRA-2) [@bosilovich2015merra] y la base de datos de Google Traffic [@wu2007google]. Una descripción completa de cada una de las variables involucradas se encuentra en el Anexo 2.
   
 Table: Fuentes de datos de variables satelitales. \label{tab:satdata}
 Referencia: Fuente de datos, dependencia, resolución espacial, resolución temporal y número total de variables descargadas.
 
 | Fuente | Dependencia | Espacial | Temporal | Variables |
 |----------|:--------:|:--------:|:--------:|:--------:|:--------:| 
-| ERA5 (ECMWF reanálisis) | ECMWF | 0.25°x0.25° | horaria | 172 |
+| ERA5 (ECMWF reanálisis) | ECMWF | 0.25°x0.25° | horaria | 164 |
 | MODIS-MAIAC (MCD19A2) | NASA | 0.1°×0.1° | horaria | 1 |
 | MERRA-2 (M2T1NXFLX) | NASA  | 0.625°×0.5° | horaria | 1 |
 | MERRA-2 (M2IMNXGAS) | NASA  | 0.625°×0.5° | horaria | 1 |
@@ -81,7 +81,7 @@ Loss = Error(Y - \widehat{Y}) + \lambda \sum_1^n |w_i| \label{eq:LASSO}
 
   El algoritmo *featurewiz* [@bakheet2023hybrid; @novaes2022modelo; @hu2023glass], surge de la combinación de dos algoritmos de selección de características. En primer lugar, emplea el algoritmo de *SULOV* (*Searching for Uncorrelated List of Variables*), el cual se encuentra basado en el algoritmo de *MRMR* (*Minimum-Redundancy-Maximum-Relevance*) [@radovic2017minimum]. Este permite reducir la base de datos a un número óptimo de variables no correlacionadas que contienen la máxima información mutua con respecto a la variable respuesta. Una vez que *SULOV* ha seleccionado las variables más relevantes, se emplea un método de eliminación recursiva de variables (*RFE* de *Recursive Feature Elimination*). La *RFE* es un método de selección de características que ajusta de forma iterativa un algoritmo predictivo a una base de datos, eliminando aquellas características de menor importancia, hasta alcanzar el número optimo de variables que permiten maximizar el desempeño predictivo. El algoritmo de *featurewiz* emplea una eliminación recursiva basada en el algoritmo predictivo de *XGBoost*, el cual es un método de ensamblado (*ensamble*) perteneciente a la familia de los algoritmos de *boosting*, cuya característica principal es que el entrenamiento del modelo predictivo se genera de forma secuencial [@chen2015xgboost; @chen2016xgboost]. De esta forma, el algoritmo de *featurewiz* posteriormente a la reducción por *SULOV* aplica un algoritmo de *XGBoost Recursivo*. De esta forma, el algoritmo logra encontrar el conjunto óptimo de características, que permite entrenar un modelo de aprendizaje automático robusto.
   
-  Las variables incluidas en cada una de las bases de datos original y reducidas por selección de características, para cada uno de los usos de suelo se encuentran descriptas en el [Anexo](#cap:anx).
+  Las variables incluidas en cada una de las bases de datos original y reducidas por selección de características, para cada uno de los usos de suelo se encuentran descriptas en el Anexo 1.
 
 #### Metodología de entrenamiento
  
@@ -162,7 +162,7 @@ r = \frac{{}\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}
 
 #### Base de datos original
 
-  En esta sección se desarrolló el modelado predictivo a partir de la base de datos que involucró todas las variables descargadas de las fuentes de satelitales, una descripción detallada de cada una de ellas puede hallarse en el [Anexo](#cap:anx). La base de datos original empleada para llevar a cabo el modelado predictivo involucró un total de 198 variables predictoras.
+  En esta sección se desarrolló el modelado predictivo a partir de la base de datos que involucró todas las variables descargadas de las fuentes de satelitales, una descripción detallada de cada una de ellas puede hallarse en el Anexo 2. La base de datos original empleada para llevar a cabo el modelado predictivo involucró un total de 193 variables predictoras.
 
 Table: Métricas de ajuste de modelos predictivos aplicados en el contexto de aprendizaje automático al set de datos de entrenamiento para el uso de suelo urbano. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la concentración de PM~2.5~, es decir [$\frac{\mu g}{m^3}$]. \label{tab:modurbtrain}
 Referencias: Raíz del error cuadrático medio ($RMSE$), error absoluto medio ($MAE$), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin ($CCC$).
@@ -281,7 +281,7 @@ knitr::include_graphics("images/imagescap3/impurb_feat.png")
 
 #### Base de datos original
   
-  En esta sección se desarrolló el modelado predictivo a partir de la base de datos original que cuenta con un total de 198 variables predictoras, las cuales se encuentran descriptas en el [Anexo](#cap:anx).
+  En esta sección se desarrolló el modelado predictivo a partir de la base de datos original que cuenta con un total de 193 variables predictoras, las cuales se encuentran descriptas en el Anexo 2.
 
 Table: Métricas de ajuste de modelos predictivos aplicados en el contexto de aprendizaje automático al set de datos de entrenamiento para el uso de agrícola y área verde. Los valores de *RMSE* y *MAE* se encuentran en las mismas unidades que la concentración de PM~2.5~, es decir [$\frac{\mu g}{m^3}$]. \label{tab:modaatrain}
 Referencias: Error cuadrático medio ($RMSE$), error absoluto medio ($MAE$), coeficiente de determinación ($R^2$), coeficiente de correlación de Pearson ($r$) y coeficiente de concordancia de Lin ($CCC$).

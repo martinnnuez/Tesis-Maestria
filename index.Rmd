@@ -27,9 +27,6 @@ dedication: |
   __
   __
 
-preface: |
-  `r if(knitr:::is_latex_output()) paste(readLines("prefacio.Rmd", encoding = "UTF-8"), collapse = '\n  ')`
-
 #   This is an example of a thesis setup to use the reed thesis document class
 #   (for LaTeX) and the R bookdown package, in general.
 bibliography: bib/thesis.bib
