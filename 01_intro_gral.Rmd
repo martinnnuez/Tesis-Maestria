@@ -34,7 +34,13 @@
 
 ## Resumen gráfico del protocolo analítico
 
-```{r diagrama, echo=FALSE, out.width="100%", fig.align="center",fig.cap="(ref:diagrama)"}
-knitr::include_graphics("images/diagram5.png")
+```{r diagrama1, echo=FALSE, out.width="100%", fig.align="center",fig.cap="(ref:diagrama1)"}
+knitr::include_graphics("images/d1.png")
 ```
-(ref:diagrama) Resumen gráfico del protocolo analítico desarrollado desde la descarga de datos hasta el modelado predictivo.
+(ref:diagrama1) Resumen gráfico del protocolo analítico desarrollado desde la descarga de datos hasta la creación de los diferentes sub conjuntos de datos.
+
+```{r diagrama2, echo=FALSE, out.width="100%", fig.align="center",fig.cap="(ref:diagrama2)"}
+knitr::include_graphics("images/d2.png")
+```
+(ref:diagrama2) Resumen gráfico del protocolo analítico desarrollado desde los sub conjuntos de datos hasta el modelado predictivo.
+
