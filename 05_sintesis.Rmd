@@ -6,7 +6,7 @@
 
   Los resultados obtenidos indicaron que los modelos predictivos desarrollados logran explicar la variabilidad de la concentración de PM~2.5~ a partir de variables satelitales y temporales, obteniendo resultados comparables e incluso superiores al modelo base propuesto. Cabe destacar que la predicción con cinco días de anticipación posee potencial para alertar a la población ante condiciones adversas de calidad de aire. Además, es importante notar que las características de la series temporales bajo cada uno de los usos de suelo y las de aprendizaje de cada algoritmo fueron determinantes en los resultados de mejor ajuste. La serie de tiempo de concentración de PM~2.5~ en el uso de suelo agrícola y área verde exhibió una menor variabilidad, requiriendo menor cantidad de información para explicar sus variaciones. Finalmente los algoritmos de redes neuronales recurrentes resultaron más aptos para modelar la serie de mayor variabilidad, mientras que la serie de menor variabilidad obtuvo resultados de mayor capacidad bajo el algoritmo de bosques aleatorios. 
   
-## Futuras lineas de investigación
+# Futuras lineas de investigación {-}
   
   Se propone como futuro lineamiento de continuación de esta tesis el estudio de la variabilidad conjunta de la concentración de PM~2.5~ con respecto a cada una de las variables satelitales con el objetivo de identificar cuáles son las que más covarían con la concentración de este contaminante. Sería interesante considerar también las correlaciones entre las potenciales variables explicativas para caracterizar el sistema de correlaciones y dependencias, como se hace en un análisis de sendero o modelo de ecuaciones estructurales. 
   
