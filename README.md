@@ -1,4 +1,4 @@
-![Maestría en Estadística Aplicada de la Universidad Nacional de Córdoba](https://graduados.eco.unc.edu.ar/images/00_Header.png) 
+![Maestría en Estadística Aplicada de la Universidad Nacional de Córdoba](/images/Facu.png) 
 
 # ESTRATEGIAS DE MODELADO PREDICTIVO DE CONCENTRACIÓN DE MATERIAL PARTICULADO FINO (PM<sub>2.5</sub>) A PARTIR DE SERIES TEMPORALES
 
