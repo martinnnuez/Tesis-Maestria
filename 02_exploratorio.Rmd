@@ -249,14 +249,12 @@ knitr::include_graphics("images/imagescap2/pmestacionhorauso.png")
 #### Medidas descriptivas
 
 Table: Medidas descriptivas de series temporales promedio para los distintos usos de suelo. \label{tab:descript}
-Referencias: coeficiente de variación (CV) y rango intercuartílico (RI).
+Referencias: Rango intercuartílico (RI).
 
 | Medida | Urbano | Agrícola y área verde |
 |:-----------------------------:|:---------:|:---------:|
 | Media | 11.54 | 6.78 |
-| Varianza | 97.91 | 37.23 |
 | Desvió estándar  | 9.90 | 6.10 |
-| CV  | 86% | 90% |
 | Máximo | 81.80 | 47.02 |
 | Mínimo | 0 | 0 |
 | Percentil 50  | 8.41 | 4.92 |
@@ -271,7 +269,7 @@ Referencias: coeficiente de variación (CV) y rango intercuartílico (RI).
 
   También puede apreciarse que el valor del percentil 90 para la serie de datos agrícola y de área verde es prácticamente similar al percentil 75 de la serie de datos urbana. Este hecho evidencia en términos generales que un mayor porcentaje de datos se encuentra por debajo del mismo límite numérico, indicando que la serie de datos urbana toma valores de mayor magnitud que la serie de datos agrícola y área verde.
   
-  El coeficiente de variación permite concluir que la serie agrícola y área verde posee menor dispersión de datos respecto a su media o lo que es equivalente, mayor concentración de datos en torno a su media respecto de la serie urbana. De esta forma queda en evidencia que la serie de tiempo urbana toma valores de mayores magnitudes que la serie de tiempo agrícola y área verde, encontrándose sus registros más dispersos respecto a su media. Asimismo, es importante destacar que estos resultados son específicos para la zona y el período de estudio y que podrían variar en otras regiones geográficas y períodos de tiempo.
+  Estos datos permiten concluir que la serie agrícola y área verde posee menor dispersión de datos respecto a su media o lo que es equivalente, mayor concentración de datos en torno a su media respecto de la serie urbana. De esta forma queda en evidencia que la serie de tiempo urbana toma valores de mayores magnitudes que la serie de tiempo agrícola y área verde, encontrándose sus registros más dispersos respecto a su media. Asimismo, es importante destacar que estos resultados son específicos para la zona y el período de estudio y que podrían variar en otras regiones geográficas y períodos de tiempo.
 
 ```{r boxplotcomp, echo=FALSE, out.width="100%", fig.align="center", fig.cap="(ref:boxplotcomp)"}
 knitr::include_graphics("images/imagescap2/boxplotcomp.png")
