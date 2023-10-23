@@ -595,3 +595,443 @@ Temperatura de la piel	k	Este parámetro es la temperatura de la superficie de l
 * Desviación espectral de onda	[adimensional]:	Este parámetro es una medida estadística utilizada para pronosticar olas oceánicas/oceánicas extremas o anormales. Describe la naturaleza de la elevación de la superficie del mar y cómo se ve afectada por las olas generadas por los vientos locales y asociadas con el oleaje. En condiciones típicas, la elevación de la superficie del mar, tal como la describe su función de densidad de probabilidad, tiene una distribución casi normal en el sentido estadístico. Sin embargo, bajo ciertas condiciones de olas, la función de densidad de probabilidad de la elevación de la superficie del mar puede desviarse considerablemente de la normalidad, lo que indica una mayor probabilidad de olas anormales. Este parámetro da una medida de la desviación de la normalidad. Es una medida de la asimetría de la función de densidad de probabilidad de la elevación de la superficie del mar.
 
 * Nivel de cero grados [metro]:	La altura sobre la superficie de la Tierra donde la temperatura pasa de valores positivos a negativos, correspondientes a la parte superior de una capa cálida, en el momento especificado. Este parámetro se puede utilizar para ayudar a pronosticar la nieve. Si se encuentra más de una capa cálida, entonces el nivel de cero grados corresponde a la parte superior de la segunda capa atmosférica. Este parámetro se establece en cero cuando la temperatura en toda la atmósfera es inferior a 0℃.
+
+# Anexo 3: Pseudocódigo {-}
+
+### Análisis exploratorio
+
+* Código R
+
+```{r eval=F, echo=T}
+# Importar librerías necesarias:
+
+library(tidyverse)
+library(univariateML)
+library(lubridate)
+library(xts)
+library(reshape2)
+library(TSstudio)
+library(forecast)
+library(flextable)
+library(openair)
+library(methods)
+library(ggpubr)
+library(urca)
+library(future)
+library(RTransferEntropy)
+library(tseries)
+library(uroot)
+
+# Lectura de datos y preprocesamiento de datos:
+
+datos<- read.table("base_de_datos.txt",sep=";", header=T, dec=".")
+
+datos$date <- as.POSIXct(datos$date, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+datos$fecha <- as.POSIXct(datos$fecha, format = "%Y-%m-%d", tz = "UTC") 
+datos$id <- as.factor(datos$id)
+datos$hora <- as.numeric(datos$hora)
+datos$mes <- as.numeric(datos$mes)
+datos$dia <- as.numeric(datos$dia)
+datos$semana <- as.numeric(datos$semana)
+
+datos$dayofyear<-yday(datos$date)
+
+datos$dia_2 <- recode(datos$dia, 
+                      "1"="Domingo",
+                      "2"="Lunes",
+                      "3"="Martes",
+                      "4"="Miercoles",
+                      "5"="Jueves",
+                      "6"="Viernes",
+                      "7"="Sabado")
+
+datos$mes_2 <- recode(datos$mes, 
+                      "1"="Enero",
+                      "2"="Febrero",
+                      "3"="Marzo",
+                      "4"="Abril",
+                      "5"="Mayo",
+                      "6"="Junio",
+                      "7"="Julio",
+                      "8"="Agosto",
+                      "9"="Septiembre",
+                      "10"="Octubre",
+                      "11"="Noviembre",
+                      "12"="Diciembre")
+
+datos$estacion <- as.numeric(datos$estacion)
+
+datos$estacion_2 <- recode(datos$estacion, 
+                      "1"="Otoño",
+                            "2"="Invierno",
+                            "3"="Primavera",
+                            "4"="Verano")
+
+estacion_name <- c("1"="Otoño",
+                            "2"="Invierno",
+                            "3"="Primavera",
+                            "4"="Verano")
+
+mes_name <- c("1"="Enero",
+                            "2"="Febrero",
+                            "3"="Marzo",
+                            "4"="Abril",
+                            "5"="Mayo",
+                            "6"="Junio",
+                            "7"="Julio",
+                      "8"="Agosto",
+                      "9"="Septiembre",
+                      "10"="Octubre",
+                      "11"="Noviembre",
+                      "12"="Diciembre")
+
+dia_name <- c("8"="Domingo",
+                            "2"="Lunes",
+                            "3"="Martes",
+                            "4"="Miercoles",
+                            "5"="Jueves",
+                            "6"="Viernes",
+                            "7"="Sabado")
+
+datos<-datos %>%
+  mutate(id_comp = if_else(id == "CES", "Campo Escuela",
+                                 if_else(id == "CGA", "Alta Cordoba",
+                                         if_else(id == "CGI", "Rio Ceballos",
+                                                 if_else(id == "CRA", "Casa Radical",
+                                                         if_else(id == "CUN", "Ciudad Universitaria",
+                                                                 if_else(id == "JCE", "Juarez Celman",
+                                                                         if_else(id == "CMA", "Tablada Park", "La Reserva"
+                                                                                 ))))))),
+         id_comp = as.factor(id_comp)
+  )
+
+datos$id_clust[datos$id_clust == "Agricola/AreaVerde"] <- "Agrícola y área verde"
+
+# Cálculo promedios horarios:
+
+prom <- datos %>%
+  group_by(date) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+pm_ts<-prom$PM25 %>% ts(freq= 24)
+
+# Análisis exploratorio y visualizaciones:
+
+## Ejemplo:
+
+### Analisis horario
+
+datos3 <- datos %>% 
+  group_by(hora) %>%
+  summarise(mean_pm25=mean(PM25),.groups = "drop")
+names(datos3)<-c("hora","PM25")
+
+datos3$hora <-  as.numeric(datos3$hora)
+
+datos3 %>% 
+  ggplot(aes(x=hora, y=PM25)) +
+  geom_point(size=1)+
+  geom_line(size=1)+ 
+  theme_bw() +
+  ylab(expression(PM[2.5]~paste("[", mu, "g/",m^3,"]")))+
+  theme(text = element_text( size=30),
+    axis.text.x=element_text(angle=0, hjust=1),
+    legend.position="bottom")+
+  scale_x_continuous("Hora",breaks=seq(0, 24, 1))
+
+### Análisis horario por uso de suelo.
+
+datos$hora <- as.numeric(datos$hora)
+# Diario cada lugar
+datos3 <- datos %>%
+  group_by(id_clust,hora) %>%
+  summarise(mean_pm25=mean(PM25),.groups = "drop")
+names(datos3)<-c("id_us","hora","PM25")
+
+datos3$hora<-as.numeric(datos3$hora)
+
+datos3 %>% 
+  ggplot(aes(x=hora, y=PM25, color=id_us)) +
+  geom_point(size=1)+
+  geom_line(size=1)+ 
+  theme_bw() +
+  ylab(expression(PM[2.5]~paste("[", mu, "g/",m^3,"]")))+
+  theme(text = element_text( size=30),
+        axis.text.x=element_text(angle=60, hjust=1),
+        legend.position="bottom")+
+  guides(colour=guide_legend(title="Uso de suelo"))+
+  scale_x_continuous("Hora", labels = as.character(datos3$hora), breaks = datos3$hora)+ scale_colour_manual(values = c("#00BA38", "#F8766D", "#619CFF"))
+```
+
+### Modelado predictivo
+
+* Código python
+
+```{python eval=F, echo=T}
+# Importar librerías necesarias:
+
+from numpy.random import seed
+seed(1)
+import tensorflow
+tensorflow.random.set_seed(2)
+import numpy as np
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import random
+
+# Lectura y preprocesamiento de los datos:
+
+os.chdir('Proyecto')
+datos = pd.read_csv("base_de_datos.txt",sep=";")
+datos = datos.drop(["ano"],axis=1)
+
+## Encoding de variables temporales:
+def Enc_temp(df,temporales):
+    # Ordenar valores
+    df = df.sort_index(ascending=True)
+
+    # Hacer el encoding de las temporales
+    for i,col in enumerate(temporales):
+        df[col+'_'+"sin"] = np.sin(2 * np.pi * df[col]/df[col].max())
+        df[col+'_'+"cos"] = np.cos(2 * np.pi * df[col]/df[col].max())    
+    return(df)
+
+datos = Enc_temp(datos,["mes","dia","hora","dia_mes","estacion"])
+print("Shape datos encoding temporales:",datos.shape)
+
+## Divición en X e y
+X = datos.drop(["PM25"],axis=1)
+y = datos[["PM25"]]
+print("Shape X:",X.shape)
+print("Shape y:",y.shape)
+
+## Desfasaje de la variable respuesta
+N = 120
+y = y.iloc[N-1:].copy() 
+print("Shape y_lag:",y.shape)
+X = X.iloc[:-(N-1)].copy() 
+print("Shape X_lag:",X.shape)
+
+## Crear semillas aleatorias
+randoms = random.sample(range(1, 5000), 10)
+randoms = [2474, 2905, 4850, 1194, 77, 3684, 3544, 520, 4365, 3769]
+
+## Data frame de resultados
+
+results = pd.DataFrame(columns = ['Modelo', 'mean_absolute_error',"mean_squared_error","root_mean_squared_error","max_error"])
+
+# Modelado predictivo: 
+
+## Ejemplo:
+
+### Random Forest:
+
+from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error, mean_squared_error,max_error
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+model = RandomForestRegressor()
+
+mae = []
+mse = []
+rmse = []
+me = []
+
+for i in randoms:
+    # Divido entrenamiento y testeo estratificado
+    X['mes_dia'] = X['mes'].astype(str) + X['dia'].astype(str)
+    # División entrenamiento y testeo
+    X_training, X_test_red, y_training, y_test_red = train_test_split(X, y, test_size=0.1, random_state=i, stratify=X[['mes_dia']])
+    X_train_red, X_val_red, y_train_red, y_val_red = train_test_split(X_training, y_training, test_size=0.1, random_state=i, stratify=X_training[['mes_dia']])
+
+    X_train_red = X_train_red.drop(["mes_dia"],axis=1)
+    X_test_red = X_test_red.drop(["mes_dia"],axis=1)
+    X_val_red = X_val_red.drop(["mes_dia"],axis=1)
+
+    X_train_red = X_train_red.sort_index(ascending=True)
+    X_test_red = X_test_red.sort_index(ascending=True)
+    y_train_red = y_train_red.sort_index(ascending=True)
+    y_test_red = y_test_red.sort_index(ascending=True)
+    X_val_red = X_val_red.sort_index(ascending=True)
+    y_val_red = y_val_red.sort_index(ascending=True)
+
+    X_train = pd.concat([X_train_red, X_val_red], axis=0)
+    y_train = pd.concat([y_train_red, y_val_red], axis=0)
+    X_train = X_train.sort_index(ascending=True)
+
+     y_train = y_train.sort_index(ascending=True)
+
+    X_test = X_test_red.copy(deep=True)
+    y_test = y_test_red.copy(deep=True)
+    
+    # Estandarizo
+    columns_x = list(X_train.columns)
+    scaler_x = StandardScaler()
+    X_train_std = X_train.copy()
+    X_train_std[columns_x] = scaler_x.fit_transform(X_train[columns_x])
+    X_test_std = X_test.copy()
+    X_test_std[columns_x] = scaler_x.transform(X_test[columns_x])
+
+    columns_y = list(y_train.columns)
+    scaler_y = StandardScaler()
+    y_train_std = y_train.copy()
+    y_train_std[columns_y] = scaler_y.fit_transform(y_train[columns_y])
+    y_test_std = y_test.copy()
+    y_test_std[columns_y] = scaler_y.transform(y_test[columns_y])
+
+    # Modelo
+    model.fit(
+        X_train_std,
+        y_train_std,
+        # eval_set=[(X_test_std, y_test_std)],
+        # eval_metric="mean_squared_error",
+        # early_stopping_rounds=100
+        )
+    # Predicciones
+    preds = model.predict(X_test_std)
+    inv_yhat = scaler_y.inverse_transform(preds.reshape(-1,1))
+    inv_y = scaler_y.inverse_transform(y_test_std)
+    
+    # Recopilo métricas
+    mae.append(mean_absolute_error(inv_y,inv_yhat))
+    mse.append(mean_squared_error(inv_y,inv_yhat, squared=True))
+    rmse.append(mean_squared_error(inv_y,inv_yhat, squared=False))
+    me.append(max_error(inv_y,inv_yhat))
+
+print(np.mean(mae))
+print(np.mean(mse))
+print(np.mean(rmse))
+print(np.mean(me))
+
+resultado_parcial = {"Modelo":"RanfomForest_Long_AA",
+"mean_absolute_error":np.mean(mae),
+"mean_squared_error":np.mean(mse),
+"root_mean_squared_error":np.mean(rmse),
+"max_error":np.mean(me)
+}
+
+results=results.append(resultado_parcial, 
+            ignore_index = True)
+
+results.head(25)
+
+### Gated Recurrent Units (GRU):
+
+from tensorflow.keras.layers import GRU
+
+mae = []
+mse = []
+rmse = []
+me = []
+
+for i in randoms:
+    X['mes_dia'] = X['mes'].astype(str) + X['dia'].astype(str)
+    X_training, X_test_red, y_training, y_test_red = train_test_split(X, y, test_size=0.1, random_state=i, stratify=X[['mes_dia']])
+    X_train_red, X_val_red, y_train_red, y_val_red = train_test_split(X_training, y_training, test_size=0.1, random_state=i, stratify=X_training[['mes_dia']])
+    X_train_red = X_train_red.drop(["mes_dia"],axis=1)
+    X_test_red = X_test_red.drop(["mes_dia"],axis=1)
+    X_val_red = X_val_red.drop(["mes_dia"],axis=1)
+    X_train_red = X_train_red.sort_index(ascending=True)
+    X_test_red = X_test_red.sort_index(ascending=True)
+    y_train_red = y_train_red.sort_index(ascending=True)
+    y_test_red = y_test_red.sort_index(ascending=True)
+    X_val_red = X_val_red.sort_index(ascending=True)
+    y_val_red = y_val_red.sort_index(ascending=True)
+
+columns_x = list(X_train_red.columns)
+    scaler_x = StandardScaler()
+    X_train_red[columns_x] = scaler_x.fit_transform(X_train_red[columns_x])
+    X_test_red[columns_x] = scaler_x.transform(X_test_red[columns_x])
+    X_val_red[columns_x] = scaler_x.transform(X_val_red[columns_x])
+
+    columns_y = list(y_train_red.columns)
+    scaler_y = StandardScaler()
+    y_train_red[columns_y] = scaler_y.fit_transform(y_train_red[columns_y])
+    y_test_red[columns_y] = scaler_y.transform(y_test_red[columns_y])
+    y_val_red[columns_y] = scaler_y.transform(y_val_red[columns_y])
+    
+    X_train_red = X_train_red.to_numpy().reshape((X_train_red.shape[0], 1, X_train_red.shape[1]))
+    X_test_red = X_test_red.to_numpy().reshape((X_test_red.shape[0], 1, X_test_red.shape[1]))
+    X_val_red = X_val_red.to_numpy().reshape((X_val_red.shape[0], 1, X_val_red.shape[1]))
+
+    y_train_red=y_train_red.to_numpy()
+    y_test_red = y_test_red.to_numpy()
+    y_val_red = y_val_red.to_numpy()
+columns_x = list(X_train_red.columns)
+    scaler_x = StandardScaler()
+    X_train_red[columns_x] = scaler_x.fit_transform(X_train_red[columns_x])
+    X_test_red[columns_x] = scaler_x.transform(X_test_red[columns_x])
+    X_val_red[columns_x] = scaler_x.transform(X_val_red[columns_x])
+
+    columns_y = list(y_train_red.columns)
+    scaler_y = StandardScaler()
+    y_train_red[columns_y] = scaler_y.fit_transform(y_train_red[columns_y])
+    y_test_red[columns_y] = scaler_y.transform(y_test_red[columns_y])
+    y_val_red[columns_y] = scaler_y.transform(y_val_red[columns_y])
+
+    X_train_red = X_train_red.to_numpy().reshape((X_train_red.shape[0], 1, X_train_red.shape[1]))
+    X_test_red = X_test_red.to_numpy().reshape((X_test_red.shape[0], 1, X_test_red.shape[1]))
+    X_val_red = X_val_red.to_numpy().reshape((X_val_red.shape[0], 1, X_val_red.shape[1]))
+
+    y_train_red=y_train_red.to_numpy()
+    y_test_red = y_test_red.to_numpy()
+    y_val_red = y_val_red.to_numpy()
+
+ # Modelado
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=30,restore_best_weights=True)
+
+    regressor = Sequential()
+    regressor.add(GRU(units = 200,return_sequences=True,  input_shape=(X_train_red.shape[1], X_train_red.shape[2])))
+    regressor.add(Dropout(0.3))
+
+    regressor.add(GRU(units = 100,return_sequences=True))
+    regressor.add(Dropout(0.3))
+
+    regressor.add(GRU(units = 100))
+    regressor.add(Dropout(0.3))
+
+    regressor.add(Dense(units = 1, activation = 'linear'))
+
+    regressor.compile(optimizer = keras.optimizers.Adam(1e-3), loss = 'mean_squared_error', 
+                  metrics = ['mean_squared_error'])
+    regressor.fit(X_train_red, y_train_red, epochs=200, batch_size=64, validation_data=(X_val_red, y_val_red), verbose=2, shuffle=False, callbacks=[es])
+    
+# Predicciones
+    yhat = regressor.predict(X_test_red)
+    inv_yhat = scaler_y.inverse_transform(yhat)
+    inv_yhat = inv_yhat[:,0]
+    test_y = y_test_red.reshape((len(y_test_red), 1))
+    inv_y = scaler_y.inverse_transform(test_y)
+    inv_y = inv_y[:,0]
+    
+    mae.append(mean_absolute_error(inv_y,inv_yhat))
+    mse.append(mean_squared_error(inv_y,inv_yhat, squared=True))
+    rmse.append(mean_squared_error(inv_y,inv_yhat, squared=False))
+    me.append(max_error(inv_y,inv_yhat))
+
+print(np.mean(mae))
+print(np.mean(mse))
+print(np.mean(rmse))
+print(np.mean(me))
+
+resultado_parcial = {"Modelo":"GRU_3",
+"median_absolute_error":np.mean(mae),
+"mean_squared_error":np.mean(mse),
+"root_mean_squared_error":np.mean(rmse),
+"max_error":np.mean(me)
+}
+
+results=results.append(resultado_parcial, 
+            ignore_index = True)
+
+results.head(15)
+
+# Luego de correr todos los modelos, continuamos con la comparación 
+
+results.head(50)
+
+# Comparar
+```
+
+
