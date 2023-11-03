@@ -19,14 +19,14 @@
   La base de datos para el desarrollo de esta sección surge de la combinación de los datos recopilados durante el muestreo de PM~2.5~ (ver capítulo [2](#cap:expl) para más detalles) con distintas variables generadas a partir de información satelital. Entre estas se destacan las variables generadas por el modelo de ERA5, que surge del reanálisis realizado por el Centro Europeo de Previsión Meteorológica a Plazo Medio (ECMWF) para el clima global [@hersbach2020era5; @bell2021era5]. Este método de estimación combina modelos predictivos con observaciones a lo largo de todo el mundo, dando por resultado un conjunto de datos completo a escala global, cuyo principio de funcionamiento se basa en la asimilación de datos. ERA5 permitió disponer de información de 164 variables atmosféricas, oceánicas y terrestres, que fueron incorporadas a la base de datos para desarrollar la tesis. Estas estimaciones cuentan con una resolución temporal de una hora y una espacial de 0.25 grados. Además, se incluyeron otras covariables, citadas en la literatura como relevantes para el PM~2.5~, provenientes de las mediciones del sensor MODIS a bordo de los satélites Terra y Aqua de la Administración Nacional de Aeronáutica y el Espacio (NASA) [@savtchenko2004terra; @lyapustin2019maiac; @lyapustin2018modis; @hulley2014thermal], datos obtenidos a partir del análisis retrospectivo de la era moderna para investigación y aplicaciones, versión 2 (MERRA-2) [@bosilovich2015merra] y la base de datos de Google Traffic [@wu2007google]. Una descripción completa de cada una de las variables involucradas se encuentra en el Anexo 2.
   
 Table: Fuentes de datos de variables derivadas a partir de información satelital. \label{tab:satdata}
-Referencia: Fuente de datos, dependencia, resolución espacial, resolución temporal y número total de variables descargadas. Variables especificas descargadas de cada uno de los productos satelitales: MODIS-MAIAC (MCD19A2) *Optical_Depth_047* (*Blue band (0.47 μm) aerosol optical depth over land*), MERRA-2 (M2T1NXFLX) *PBLH* (*planetary boundary layer height *), MERRA-2 (M2I3NXGAS) *AODANA* y *AODINC* (*Aerosol Optical Depth Analysis* y *Aerosol Optical Depth Analysis Increment*), VIIRS (VNP14A1) *FireMask* (*Confidence of fire*) y MODIS (MOD11A1/MYD11A1) *LST_Day_1km* y *LST_Night_1km* (*Daytime Land Surface Temperature* y *Nighttime Land Surface Temperature*).
+Referencia: Fuente de datos, dependencia, resolución espacial, resolución temporal y número total de variables descargadas. Variables especificas descargadas de cada uno de los productos satelitales: MODIS-MAIAC (MCD19A2) *Optical_Depth_047* (*Blue band (0.47 ${\mu m}$) aerosol optical depth over land*), MERRA-2 (M2T1NXFLX) *PBLH* (*planetary boundary layer height *), MERRA-2 (M2I3NXGAS) *AODANA* y *AODINC* (*Aerosol Optical Depth Analysis* y *Aerosol Optical Depth Analysis Increment*), VIIRS (VNP14A1) *FireMask* (*Confidence of fire*) y MODIS (MOD11A1/MYD11A1) *LST_Day_1km* y *LST_Night_1km* (*Daytime Land Surface Temperature* y *Nighttime Land Surface Temperature*).
 
 | Fuente | Dependencia | Espacial | Temporal | Variables |
 |----------|:--------:|:--------:|:--------:|:--------:|:--------:| 
 | ERA5 (ECMWF reanálisis) | ECMWF | 0.25°x0.25° | horaria | 164 |
-| MODIS-MAIAC (MCD19A2) | NASA | 0.1°×0.1° | 3 a 5 datos horarios | 1 |
+| MODIS-MAIAC (MCD19A2) | NASA | 0.1°×0.1° | 3 a 5 (hora) | 1 |
 | MERRA-2 (M2T1NXFLX) | NASA  | 0.625°×0.5° | horaria | 1 |
-| MERRA-2 (M2I3NXGAS) | NASA  | 0.625°×0.5° | 1 dato cada 3 horas | 1 |
+| MERRA-2 (M2I3NXGAS) | NASA  | 0.625°×0.5° | 1 (3 horas) | 1 |
 | MERRA-2 (SODA) | NASA | 0.625°×0.5° | horaria | 9 |
 | VIIRS (VNP14A1) | NASA | 0.1°×0.1° | diaria | 1 |
 | MODIS (MOD11A1/MYD11A1) | NASA | 0.1°×0.1° | horaria | 1 |
@@ -75,12 +75,9 @@ knitr::include_graphics("images/imagescap3/redalgo.png")
   
   El algoritmo LASSO es una técnica de selección de variables que utiliza una penalización (L1) para reducir la complejidad del modelo y mejorar su capacidad de generalización. Su objetivo es encontrar el subconjunto óptimo de variables más relevantes para desarrollar un modelo predictivo. Para lograr esto, LASSO minimiza una función de costo regularizada, que introduce un término de penalización L1 (Ecuación 2). La penalización actúa como un mecanismo de selección de variables, ya que algunos coeficientes de regresión se reducirán a cero, lo que indica que las variables correspondientes no contribuyen significativamente al modelo. Una de las características útiles de LASSO es que permite reducir la dimensionalidad de los datos al eliminar las variables menos importantes [@robert1994regression].
 
-$$
 \begin{equation*} 
-Loss = Error(Y - \widehat{Y}) + \lambda \sum_1^n |w_i|
-\tag{2}
+Loss = Error(Y - \widehat{Y}) + \lambda \sum_1^n |w_i| \tag{2}
 \end{equation*}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
@@ -115,12 +112,9 @@ knitr::include_graphics("images/imagescap3/shapalgo.png")
 
   Raíz del error cuadrático medio (*root mean squared error ($RMSE$)*): expresa el promedio de la diferencia cuadrática entre los valores predichos por el modelo y los valores observados [@hyndman2006effect]. Esta es siempre no negativa, y un valor de 0 (poco común en la práctica) indicaría un ajuste perfecto a los datos. Generalmente, mientras menor $RMSE$ mejor ajuste o mayor exactitud en las predicciones. Esta métrica es sensible a valores atípicos y pone mayor peso en los grandes errores, ya que su coeficiente elevado al cuadrado influirá notablemente en el resultado [@lehmann2006theory; @pontius2008components; @willmott2006use].
 
-$$
-\begin{equation*} 
-RMSE = \sqrt{\frac{1}{n}\sum\nolimits_{i=1}^N(y_i-\hat{y_i})^2}
-\tag{3}
+\begin{equation*}
+RMSE = \sqrt{\frac{1}{n}\sum\nolimits_{i=1}^N(y_i-\hat{y_i})^2} \tag{3}
 \end{equation*}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
@@ -129,12 +123,9 @@ $$
 
   Error absoluto medio (*mean absolute error ($MAE$)*): mide la media de las diferencias absolutas entre los valores predichos por el modelo y los valores observados, siendo menos sensible a valores atípicos a diferencia del $RMSE$. Una ventaja del $MAE$ es que es fácil de interpretar, ya que se mide en las mismas unidades que la variable de respuesta. Un valor de $MAE$ más bajo indica que el modelo es más preciso. 
 
-$$ 
-\begin{equation*} 
-MAE = \sum_{i=1}^{N}|y_i-\hat{y_i}|
+\begin{equation*}
+MAE = \sum_{i=1}^{N}|y_i-\hat{y_i}| \tag{4}
 \end{equation*}
-\tag{4}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
@@ -143,38 +134,29 @@ $$
 
   Otra métrica de evaluación de modelos predictivos es el coeficiente de determinación (*coefficient of determination ($R^2$)*). Calculada bajo las predicciones en la base de datos de entrenamiento estima la proporción de la varianza de la variable respuesta que puede ser explicada por el modelo, brindando una medida de bondad de ajuste del modelo. Por otra parte, bajo una base de datos de testeo representa la capacidad predictiva del modelo ajustado. El $R^2$ toma valores entre 0 y 1, donde 0 indica que el modelo no explica nada de la variabilidad de la variable respuesta (entrenamiento), o bien que la capacidad predictiva del modelo es deficiente (testeo), mientras que 1 indica que el modelo explica la totalidad de la variabilidad (entrenamiento), o bien que estamos frente a un modelo perfecto (testeo).
 
-$$ 
-\begin{equation*} 
-R^2 = \frac{SSR}{SST}
-\end{equation*}
-\tag{5}
-$$
-\begin{flushleft}
-\setstretch{0.5}
-{\footnotesize Especificar que es cada elemento
-\textit{RMSE} PM$_{2.5}$ [$\frac{\mu g}{m^3}$] \textit{RMSE} PM$_{2.5}$}
-\end{flushleft}
+<!-- \begin{equation*}  -->
+<!-- $R^2$ = \frac{SSR}{SST} \tag{5} -->
+<!-- \end{equation*} -->
+<!-- \begin{flushleft} -->
+<!-- \setstretch{0.5} -->
+<!-- {\footnotesize Especificar que es cada elemento -->
+<!-- \textit{RMSE} PM$_{2.5}$ [$\frac{\mu g}{m^3}$] \textit{RMSE} PM$_{2.5}$} -->
+<!-- \end{flushleft} -->
 
   Donde SSR es la suma de regresión al cuadrado también conocida como variación explicada por el modelo y SST es la variación total en los datos también conocida como suma total al cuadrado.
 
-$$
 \begin{equation*} 
-SSR = \sum\nolimits_{i=1}^N(\hat{y_i}-\overline{y})^2
+SSR = \sum\nolimits_{i=1}^N(\hat{y_i}-\overline{y})^2 \tag{6}
 \end{equation*}
-\tag{6}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
 \textit{RMSE} PM$_{2.5}$ [$\frac{\mu g}{m^3}$] \textit{RMSE} PM$_{2.5}$}
 \end{flushleft}
 
-$$
 \begin{equation*} 
-SST = \sum\nolimits_{i=1}^N(y_i-\overline{y})^2
+SST = \sum\nolimits_{i=1}^N(y_i-\overline{y})^2 \tag{7}
 \end{equation*}
-\tag{7}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
@@ -185,13 +167,10 @@ $$
 
   El coeficiente de correlación de Pearson (*Pearson’s correlation coefficient (r)*) es una medida estadística que indica el grado de covariación lineal entre dos variables. Este oscila entre valores de 1 y -1, un valor de 1 indica una correlación lineal positiva perfecta, lo que significa que cuando una variable aumenta, la otra variable también aumenta en la misma proporción. Por otra parte un valor de -1 indica una correlación lineal negativa perfecta, lo que significa que cuando una variable aumenta, la otra variable disminuye proporcionalmente. Finalmente un valor de 0 indica que no hay correlación entre las variables involucradas. Es importante destacar que el coeficiente de correlación de Pearson solo mide la asociación lineal entre dos variables, por lo que puede no ser adecuado para evaluar la relación entre variables cuando esta no es lineal. Cabe destacar que en esta tesis la presente métrica se implementa para evaluar tanto la bondad de ajuste como la capacidad predictiva del modelo ajustado, por este motivo las variables comparadas son los valores observados contra los predichos por el modelo ajustado. Su cálculo bajo los resultados de una base de datos de entrenamiento permiten obtener una medida de bondad de ajuste, mientras que bajo los de una de testeo reflejan la capacidad predictiva del modelo ajustado. Se espera que mientras mejor sea el ajuste del modelo, más cercano a 1 sea el valor de esta métrica.  
 
-$$
 \begin{equation*}
-r = \frac{{}\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}
-{\sqrt{\sum_{i=1}^{n} (x_i - \overline{x})^2(y_i - \overline{y})^2}}
+r = \frac{{}\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})} 
+{\sqrt{\sum_{i=1}^{n} (x_i - \overline{x})^2(y_i - \overline{y})^2}} \tag{8}
 \end{equation*}
-\tag{8}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
@@ -200,12 +179,9 @@ $$
 
   Otra métrica útil para evaluar el ajuste de un modelo es el coeficiente de concordancia de Lin (*Lin's Concordance Correlation Coefficient ($CCC$)*), este evalúa la concordancia entre los valores observados y predichos por el modelo ajustado. A diferencia del coeficiente de correlación de Pearson, el $CCC$ mide la concordancia o acuerdo entre las variables comparadas. Los valores que toma el $CCC$ oscilan entre 1 y -1, donde un valor de 1 indica una concordancia perfecta, mientras que un valor de -1 indica una discordancia perfecta. Un valor de 0 indica que no hay concordancia entre ambas variables. Es importante destacar que el $CCC$ es una métrica más robusta que el coeficiente de correlación de Pearson, ya que no se ve afectado por valores atípicos o distribuciones no normales. Es importante destacar que los resultados obtenidos bajo una base de datos de entrenamiento permiten evaluar la bondad de ajuste del modelo predictivo, mientras que bajo los de una de testeo refleja la capacidad predictiva del modelo ajustado.
 
-$$
 \begin{equation*} 
-\dfrac{2 s_{12}}{(\overline{x}_{1} - \overline{x}_{2})^{2} + s_{1}^{2} + s_{2}^{2}}
+\dfrac{2 s_{12}}{(\overline{x}_{1} - \overline{x}_{2})^{2} + s_{1}^{2} + s_{2}^{2}} \tag{9}
 \end{equation*}
-\tag{9}
-$$
 \begin{flushleft}
 \setstretch{0.5}
 {\footnotesize Especificar que es cada elemento
