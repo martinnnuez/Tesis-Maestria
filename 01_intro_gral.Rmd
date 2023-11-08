@@ -30,11 +30,11 @@
  
   1.    Estudiar las series temporales de concentración de PM~2.5~ emitido en distintos sitios de muestreo del área metropolitana de la ciudad de Córdoba. 	
 
-  2.    Obtener variables satelitales de acceso público potencialmente correlacionadas con la concentración de PM~2.5~.  
+  2.    Obtener variables derivadas a partir de información satelital de acceso público potencialmente correlacionadas con la concentración de PM~2.5~.  
 
   3.    Construir algoritmos predictivos que aprendan de la variabilidad de las series temporales de concentración de PM~2.5~ según el uso del suelo, que permitan predecir concentraciones en un horizonte de corto plazo.
 
-  4.    Comparar la capacidad predictiva de algoritmos basados en distintos sub conjuntos de variables satelitales para distintos escenarios respecto al uso del suelo.
+  4.    Comparar la capacidad predictiva de algoritmos basados en distintos sub conjuntos de variables derivadas a partir de información satelital para distintos escenarios respecto al uso del suelo.
 
 ## Resumen gráfico del protocolo analítico
 
