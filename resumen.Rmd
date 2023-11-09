@@ -4,4 +4,4 @@
 
 \par Se observó que series temporales con características de gran variabilidad y fluctuaciones entre sus valores son más aptas para ser modeladas a través de redes neuronales recurrentes, antes que bosques aleatorios o modelos lineales. Mientras que el algoritmo de bosques aleatorios mostró un mejor desempeño bajo condiciones de menor variabilidad. 
 
-**Palabras claves:** aprendizaje automático, aprendizaje profundo, selección de características. 
+**Palabras claves:** aprendizaje automático, aprendizaje profundo, material particulado fino (PM~2.5~), selección de características. 
